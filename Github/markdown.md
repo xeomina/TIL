@@ -59,7 +59,7 @@ $ git init
 
 * 이미지는 가급적이면 상대 경로로 관리
 
-![Screen Shot 2021-01-07 at 오후 1.44](md-images/Screen%20Shot%202021-01-07%20at%20%EC%98%A4%ED%9B%84%201.44.png)
+![image](https://user-images.githubusercontent.com/76722686/105972693-3cd4ae00-60cf-11eb-85b3-3b46518ae0eb.PNG)
 
 ## 링크
 
