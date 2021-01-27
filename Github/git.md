@@ -72,7 +72,7 @@ $ git add a.txt b.txt c.txt # 복수의 파일
           1.txt
   ```
 
-  <img src="C:\Users\mina\TIL\Github\md-images\1.jpg" alt="1" style="zoom: 80%;" />
+  ![1](https://user-images.githubusercontent.com/76722686/105972995-8f15cf00-60cf-11eb-8aeb-52022299327e.jpg)
 
   * add 이후
 
@@ -88,7 +88,7 @@ $ git add a.txt b.txt c.txt # 복수의 파일
           new file:   1.txt
   ```
 
-  <img src="C:\Users\mina\TIL\Github\md-images\2.jpg" alt="2" style="zoom: 80%;" />
+  ![2](https://user-images.githubusercontent.com/76722686/105973321-f29ffc80-60cf-11eb-8c65-7d9628cc088f.jpg)
 
 3. commit
 
@@ -103,7 +103,7 @@ $ git commit -m 'First commit'
 * 해시값 고유한 커밋을 의미 ex. dc8b68b
 * 커밋 메시지는 지금 기록하는 이력을 충분히 잘 나타낼 수 있도록 작성
 
-![3](C:\Users\mina\TIL\Github\md-images\3.jpg)
+![3](https://user-images.githubusercontent.com/76722686/105973359-fe8bbe80-60cf-11eb-951c-8e9ec69d5e67.jpg)
 
 
 
@@ -292,7 +292,7 @@ Untracked files:                   # Working Directory
 
 
 
-<img src="C:\Users\mina\TIL\Github\md-images\status.jpg" alt="status" style="zoom:67%;" />
+![status](https://user-images.githubusercontent.com/76722686/105973538-32ff7a80-60d0-11eb-98da-95fd690c1699.jpg)
 
 
 
@@ -345,7 +345,7 @@ hint: (e.g., 'git pull ...') before pushing again.
 hint: See the 'Note about fast-forwards' in 'git push --help' for details.
 ```
 
-![push](C:\Users\mina\TIL\Github\md-images\push.jpg)
+![push](.\md-images\push.jpg)
 
 2. 해결 하기
 
@@ -381,7 +381,7 @@ To https://github.com/xeomina/practice.git
    aa19812..3fd24bf  master -> master
 ```
 
-![push2](C:\Users\mina\TIL\Github\md-images\push2.jpg)
+![push2](.\push2.jpg)
 
 * git log --oneline 상황 보기
 
