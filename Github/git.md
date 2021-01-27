@@ -345,7 +345,7 @@ hint: (e.g., 'git pull ...') before pushing again.
 hint: See the 'Note about fast-forwards' in 'git push --help' for details.
 ```
 
-![push](.\md-images\push.jpg)
+![push](https://user-images.githubusercontent.com/76722686/105973771-7a860680-60d0-11eb-8238-3340121f64b2.jpg)
 
 2. 해결 하기
 
@@ -381,7 +381,7 @@ To https://github.com/xeomina/practice.git
    aa19812..3fd24bf  master -> master
 ```
 
-![push2](.\push2.jpg)
+![push2](https://user-images.githubusercontent.com/76722686/105973775-7bb73380-60d0-11eb-99a7-af6697011850.jpg)
 
 * git log --oneline 상황 보기
 
@@ -397,8 +397,7 @@ To https://github.com/xeomina/practice.git
     
   * 원격
   
-    ![remote](C:\Users\mina\TIL\Github\md-images\remote.jpg)
-
+    ![remote](https://user-images.githubusercontent.com/76722686/105973842-912c5d80-60d0-11eb-8ffc-cfd3035f37ab.jpg)
 
 
 
@@ -651,7 +650,7 @@ $ git checkout -d __name__
    Deleted branch feature/data (was c266f8b).
    ```
 
-   <img src="C:\Users\mina\TIL\Github\md-images\commit.png" alt="commit" style="zoom:67%;" />
+   ![commit](https://user-images.githubusercontent.com/76722686/105973859-95587b00-60d0-11eb-8469-1ad99fc3fc27.png)
 
 #### 3) merge commit 충돌 
 
@@ -835,7 +834,7 @@ $ git checkout -d __name__
     Deleted branch feature/web (was a6181d8).
     ```
 
-    <img src="C:\Users\mina\TIL\Github\md-images\commit 2.jpg" alt="commit 2" style="zoom:67%;" />
+    ![commit 2](https://user-images.githubusercontent.com/76722686/105973863-9689a800-60d0-11eb-9e1d-631562d6c788.jpg)
 
     
 
@@ -854,11 +853,11 @@ To https://github.com/xeomina/practice.git
    66c266a..a8920a3  master -> master
 ```
 
-<img src="C:\Users\mina\TIL\Github\md-images\summary.png" alt="summary" style="zoom:67%;" />
+![summary](https://user-images.githubusercontent.com/76722686/105973893-9e494c80-60d0-11eb-8563-cc6cf16d7c71.png)
 
-<img src="C:\Users\mina\TIL\Github\md-images\upload.png" alt="upload" style="zoom:80%;" />
+![upload](https://user-images.githubusercontent.com/76722686/105973900-a0131000-60d0-11eb-8413-78f4be4d4f0c.png)
 
-<img src="C:\Users\mina\TIL\Github\md-images\git.png" alt="git" style="zoom: 67%;" />
+![git](https://user-images.githubusercontent.com/76722686/105974051-d18bdb80-60d0-11eb-94db-11d0feae3fae.png)
 
 
 
@@ -895,7 +894,7 @@ Changes not staged for commit:
         modified:   a.txt   # unstaged
 ```
 
-![unstaging](C:\Users\mina\TIL\Github\md-images\unstaging.jpg)
+![unstaging](https://user-images.githubusercontent.com/76722686/105973904-a1dcd380-60d0-11eb-9ff6-d5178948ba18.jpg)
 
 
 
@@ -924,7 +923,8 @@ On branch master
 nothing to commit, working tree clean  # Working Directory 작업 취소 
 ```
 
-![restore](C:\Users\mina\TIL\Github\md-images\restore.jpg)
+![restore](https://user-images.githubusercontent.com/76722686/105973908-a30e0080-60d0-11eb-86c6-e11c54e5b9ed.jpg)
+
 
 
 
@@ -981,7 +981,7 @@ aa19812 Update README.md
    create mode 100644 omit.txt
   ```
 
-![8678678678678](C:\Users\mina\TIL\Github\md-images\amend.jpg)
+![amend](https://user-images.githubusercontent.com/76722686/105973869-97bad500-60d0-11eb-902f-03fb6a2977da.jpg)
 
 
 
