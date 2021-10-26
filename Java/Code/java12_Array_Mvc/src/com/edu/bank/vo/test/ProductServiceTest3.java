@@ -27,27 +27,27 @@ public class ProductServiceTest3 {
 		
 		//2. Service의 구현된 메소드를 하나씩 호출
 		
-		//1)
+		//1)모든 상품들의 maker를 출력
 		service.printAllProductMaker(pros);
 		
-		//2)
+		//2)상품들의 총 구입액을 리턴
 		System.out.println(service.getTotalPrice(pros));	//return 함수이기 때문에 print
 		
-		//3)
+		//3)특정 금액 이상이 되는 제품들을 리턴
 		Product[] returnPros = service.getMorePrice(pros, 20000);
 		for(Product pro:returnPros) {				//배열의 크기가 다르기 때문에 Null 값 출력 -> Error!
 			if(pro == null) continue;				//Null일 때 건너뛰고 continue
 			System.out.println(pro.getDetails());
 		}
 		
-		//4)
+		//4)동일한 회사 제품들만 리턴
 		Product[] returnPros2 = service.getCertainCompany(pros, "농심");
 		for(Product pro:returnPros2) {				
 			if(pro == null) continue;				
 			System.out.println(pro.getDetails());
 		}
 		
-		//5)
+		//5)구입한 상품의 평균가 리턴
 		System.out.println(service.getAvgPrice(pros));
 		
 

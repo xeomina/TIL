@@ -37,7 +37,8 @@ public class PolyTest1 {
 		System.out.println(s.getDetails());
 		
 		//2)
-		m.changeDept("Marketing");
+		((Manager)m).changeDept("Marketing");
+		System.out.println(m.getDetails());
 		
 
 	}
