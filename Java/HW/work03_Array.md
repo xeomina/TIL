@@ -151,6 +151,8 @@ Result: CatA Catch
 
 
 
+ArrayPersonTypeTest3.java
+
 ```java
 package com.edu.array;
 

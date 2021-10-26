@@ -32,7 +32,7 @@ public class ArrayPersonTypeTest3 {
 		System.out.println(Arrays.toString(people));
 		
 		for(int i=0; i<people.length; i++) {
-			cnt[people[i]-1]++;	
+			cnt[people[i]]++;	
 		}
 		
 		System.out.println(Arrays.toString(cnt));
