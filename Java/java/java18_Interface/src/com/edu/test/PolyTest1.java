@@ -1,9 +1,9 @@
 package com.edu.test;
 /* 
- * Polymorphism : 부모 타입의 클래스로 자식을 생성하는 것
+ * Polymorphism
  * 
- * 
- * 2가지 이슈가 발생 
+ * 부모 타입의 클래스로 자식을 생성하는 것
+ * 2가지 이슈가 발생 -> 해결 -> 정확한 이해
  * 1)왜 결과가 멀쩡하게 출력?
  *   -> Virtual Method Invocation
  *   부모타입으로 자식객체를 생성하고
