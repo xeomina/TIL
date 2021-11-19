@@ -63,8 +63,6 @@ mysql> SELECT * FROM mysawon;
 
 
 
-### 1) SELECT 쿼리문 작성
-
 #### mysawon_mapping.xml
 
 ```xml
@@ -145,21 +143,17 @@ MySawon [num=1, age=66, id=hahash, pwd=null, name=하야시, hiredate=2021-11-18
 
 
 ```
- * 
- *					 SqlSessionFactory -> SqlSession
- * 							  SqlSession
- * 
- * 	sql query												execute method
- * INSERT INTO ~			------------------>			insert("namespace.id", vo);	
- * DELETE FROM ~			------------------>			delete("namespace.id", pk);					
- * UPDATE tanble ~			------------------>			update("namespace.id", vo);	
- * ----------------------------------------------------------------------------------------------
- * SELECT * FROM			------------------>			List<T> selectlist("namespace.id");
- * 							------------------>			List<T> selectlist("namespace.id","서울");
- * SELECT * FROM WHERE ~	------------------>			Object selectone("namespace.id",pk);
- * 
- * 
- */
+					 SqlSessionFactory -> SqlSession
+ 							  SqlSession
+ 
+ sql query												execute method
+INSERT INTO ~			------------------>			insert("namespace.id", vo);	
+DELETE FROM ~			------------------>			delete("namespace.id", pk);					
+UPDATE tanble ~			------------------>			update("namespace.id", vo);	
+----------------------------------------------------------------------------------------------
+SELECT * FROM			------------------>			List<T> selectlist("namespace.id");
+						------------------>			List<T> selectlist("namespace.id","서울");
+SELECT * FROM WHERE ~	------------------>			Object selectone("namespace.id",pk);
 ```
 
 
@@ -250,3 +244,679 @@ MySawon [num=1, age=66, id=hahash, pwd=null, name=하야시, hiredate=2021-11-18
 
 ## 3.
 
+### 1) 
+
+Command
+
+* source 불러오기
+
+```
+mysql> source C:\miracom_edu\util\spring\MyBatis_Template\1\users_mybatis.sql
+ERROR 1051 (42S02): Unknown table 'scott.users'
+Query OK, 0 rows affected (0.06 sec)
+
+Query OK, 1 row affected (0.00 sec)
+
+Query OK, 1 row affected (0.00 sec)
+
+Query OK, 1 row affected (0.00 sec)
+
+Query OK, 1 row affected (0.00 sec)
+
+Query OK, 1 row affected (0.00 sec)
+
+Query OK, 1 row affected (0.00 sec)
+
+Query OK, 0 rows affected (0.00 sec)
+```
+
+```
+mysql> desc users;
++-----------+-------------+------+-----+---------+-------+
+| Field     | Type        | Null | Key | Default | Extra |
++-----------+-------------+------+-----+---------+-------+
+| user_id   | varchar(10) | NO   | PRI | NULL    |       |
+| user_name | varchar(10) | NO   |     | NULL    |       |
+| password  | varchar(10) | NO   |     | NULL    |       |
+| age       | int(3)      | YES  |     | NULL    |       |
+| grade     | int(3)      | YES  |     | NULL    |       |
+| reg_date  | date        | YES  |     | NULL    |       |
++-----------+-------------+------+-----+---------+-------+
+6 rows in set (0.01 sec)
+```
+
+
+
+#### SqlMapConfig.xml
+
+```xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+<!-- 1.db정보 가지고 온다 -->
+<properties resource="config/dbconn.properties"/>
+<!-- 2.vo alias 지정 -->
+<typeAliases>
+	<typeAlias type="ibatis.services.domain.User" alias="user"/>
+</typeAliases>
+<!-- 3.jdbc 환경구축 -->
+<environments default="mulcam">
+	<environment id="mulcam">
+		<transactionManager type="JDBC"/>
+		<dataSource type="UNPOOLED">
+			<property name="driver" value="${jdbc.mysql.driver}"/>
+			<property name="url" value="${jdbc.mysql.url}"/>
+			<property name="username" value="${jdbc.mysql.username}"/>
+			<property name="password" value="${jdbc.mysql.password}"/>
+		</dataSource>
+	</environment>
+</environments>
+
+<!-- 4.sql mapper -->
+<mappers>
+	<mapper resource="sql/mybatis-userservice-mapping.xml"/>	
+</mappers>
+	
+</configuration>
+```
+
+
+
+#### mybatis-userservice-mapping.xml
+
+```xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--	
+	mybatis-userservice-mapping.xml : SQL 를 갖는 설정화일 (MetaData) 
+	- MyBatis Framework 은 XML MetaData를 사용 SQL구문을 관리하며,
+	  (SQL은 xml 을 통해 적절히 캡슐화 되어 애플리케이선 의 외부로 분리함)
+	- SQL문의 입력(?) / 출력(?)을 매핑한다.  <== 아래의 select element 참조
+ -->
+ 
+<!-- SQL definition -->
+<mapper namespace="UserMapper">
+	<!-- Application에서 User.getUserList id로 아래의 SQL을 참조 할 수 있다. -->
+	<!-- 입력(?) / 출력(?) 관리의 이해
+	 	- 아래의 query 수행 후 결과 resultType attribute에 선언된 UserVO 객체 Field(property)에 자동연결(?,자동 바인딩)
+	 	- SQL/Query 의 별칭(Alias)와 UserVO객체의 Field 의 변수이름이 동일한 것 확인. -->
+ 	
+	<!-- id=getUserList -->
+	<!-- SELECT에서 컬럼명과 필드명이 다르면 값을 못받아온다...Alias 사용해서 문제 해결 -->
+	<!-- 
+	select 에서 컬럼명과 필드명이 다르면 값을 못받아온다.. 알리야스를 사용해서 이 문제를 해결한다.
+	select 절에서의 컬럼이름은 vo alias 이름과 상호 호환된다.
+	user_id ====   setUserId() | getUserId()     X
+	userId  ====   setUserId() | getUserId()     O
+	
+	바디테이블의 컬럼명과 vo클래스의 필드명을 일치시키는 것이 좋다
+	만약에 컬럼명과 필드명이 일치하지 않는 경우에는
+	컬럼의 alias를 필드명으로 해주어야 값이 null로 나오는 것을 방지할 수 있다. -->
+	
+	<select id="getUserList" resultType="user"> <!-- resultType: 제네릭 -->
+		SELECT
+		user_id AS userId, 
+		user_name AS userName, 
+		password, 
+		age, 
+		grade, 
+		reg_date AS regDate
+		FROM users
+	
+	</select>
+
+	
+</mapper>
+```
+
+* 해당 클래스를 resultType로 지정해주시면 그 클래스를 제네릭으로 지니는 리스트가 리턴
+
+
+
+#### MyBatisTestApp.java
+
+```java
+package ibatis.services.user.test;
+
+
+import ibatis.services.domain.User;
+
+import java.io.Reader;
+import java.util.List;
+
+import org.apache.ibatis.io.Resources;
+import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.apache.ibatis.session.SqlSessionFactoryBuilder;
+
+
+/**
+ * FileName : MyBATISTestApp.java
+  * ㅇ JBDCTestApp.java 와 비교 이해.
+  * ㅇ mybatis Framework 에서 제공하는 API을 사용 users table 의 정보 SELECT   
+ */
+public class MyBatisTestApp {
+	///Main method
+	public static void main(String[] args) throws Exception{
+		
+		Reader reader=Resources.getResourceAsReader("config/SqlMapConfig.xml");		
+		
+		//==> 2. Reader 객체를 이용 xml metadata 에 설정된 각정 정보를 접근, 사용가능한 
+		//==>    읽어들인 reader를 바탕으로 SqlSessionFactory를 리턴받는다.
+		SqlSessionFactory factory=new SqlSessionFactoryBuilder().build(reader);
+		
+		//==> 3.factory의 openSession()을 통해서 SqlSession을 리턴 받는다.
+		SqlSession session=factory.openSession();
+		
+		List<User> list=session.selectList("UserMapper.getUserList");
+		System.out.println("#####################################");
+		System.out.println(":: 회원정보 출력");
+		
+		for (User user : list) {
+			System.out.println( user ) ;
+		}
+		System.out.println("#####################################");
+	}// end of main
+}//end of class
+
+/*
+ * ■ MyBATISTestApp / JDBCTestApp 를 통한 MyBATIS Framework 의 이해
+ * ㅇ SQL,커넥션,트랜잭선 를 메타데이타 캡술화였으며, 
+ *     :: 참조 => SqlMapConfig.xml / mybatis-userservice-mapping.xml
+ * ㅇ JDBC철차 :  Connection => Statement => ResultSet
+ *      resource 관리 : close
+ *      query 수행 결과 비지니스객체(VO) 바인딩 JDBC API 를 사용하여 수행시 반복적으로 반드시
+ *      수행하는 일련의 과정을 수행함.
+ *      :: 참조 =>List<User> list = session.selectList("User.getUserList");
+ *  
+ *  ■ MyBATIS Framework 의 장점
+ *  ㅇ 작고 간단하다 ( mybatis-3.2.8.jar / 약 400kb / 다른 라이브러리와 의존관계 없다. )
+ *  ㅇ 기존 애플리케이션/테이터베이스 변경 불필요 
+ *      (SQL Mapper(Data Mapper) =>SQL 과 비지니스 객체와의 바인딩)
+ *  ㅇ 생산성 / 성능 / 작업의 분배 (소스코드와 SQL 의 분리)
+ *  ㅇ 관심사의 분리 
+ *       ( DBMS 에 독립적인 API제공 및 JDBC API가 아닌 비지니스 객체만 가지고 작업가능)
+ *        
+  *  ■ MyBATIS Framework 은 JDBC 절차를 간결화한 lib 이다
+  *     ( JDBC를 절차 은익한 lib)        
+*/
+
+```
+
+```
+#####################################
+:: 회원정보 출력
+User [userid=mybatis01, userName=홍길동iba, password=mybatis01, age=10, grade=1, active=false, regDate=2019-10-08 09:00:00.0]
+User [userid=mybatis02, userName=이순신iba, password=mybatis02, age=20, grade=2, active=false, regDate=2019-10-07 09:00:00.0]
+User [userid=mybatis03, userName=김유신iba, password=mybatis03, age=30, grade=3, active=false, regDate=2019-10-02 09:00:00.0]
+User [userid=user01, userName=홍길동, password=user01, age=10, grade=1, active=false, regDate=2019-10-11 09:00:00.0]
+User [userid=user02, userName=이순신, password=user02, age=20, grade=2, active=false, regDate=2019-10-12 09:00:00.0]
+User [userid=user03, userName=김유신, password=user03, age=30, grade=3, active=false, regDate=2019-10-09 09:00:00.0]
+#####################################
+
+```
+
+
+
+### 2)
+
+#### SqlMapConfig.xml
+
+* `mapping01.xml` 추가
+
+```xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+   "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+   <!-- 1. db정보를 가지고 온다. -->
+   <properties resource="config/dbconn.properties"/>
+   
+   
+   <!-- 2. vo를 alias.... -->
+   <typeAliases>
+      <typeAlias type="ibatis.services.domain.User" alias="user"/>
+   </typeAliases>
+   
+   
+   <!-- 3. jdbc 환경 구축 -->
+   <environments default="mulcam">
+      <environment id="mulcam" >
+         <transactionManager type="JDBC"/>
+         <dataSource type="UNPOOLED">
+            <property name="driver" value="${jdbc.mysql.driver}"/>
+            <property name="url" value="${jdbc.mysql.url}"/>
+            <property name="username" value="${jdbc.mysql.username}"/>
+            <property name="password" value="${jdbc.mysql.password}"/>
+         
+         </dataSource>
+      </environment>
+   </environments>
+   <!--4. sql mapper -->
+   <mappers>
+      <mapper resource="sql/mybatis-userservice-mapping.xml"/>
+      <mapper resource="sql/mybatis-userservice-mapping01.xml"/>
+   </mappers>
+</configuration>
+```
+
+
+
+#### mybatis-userservice-mapping01.xml
+
+```xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 
+   id = getUser, findUserId에 해당하는 SELECT문을 작성하는 쿼리문
+   1. #{VALUE}
+   parameterType에 연결된 단순 파라미터 값을 받을 때 사용하는 문법
+   #{} 안에 들어가는 VALUE는 상징적인 값으로 아무 변수 이름을 넣어도 상관없다.
+   
+   2. parameterType이 vo의 alias인 경우,
+      #{userId} #{password}
+      vo의 getUserId() getPassword와 연결되는 getter문법이다.
+   3. parameterType, resultType의 사용법...
+   4. MyBatis에서는 Collection API, 자바 API 라이브러리 클래스를 Alias로 사용하고 있다
+   java.lang.String :: string, arraylist, list  -->
+ 
+<!-- SQL definition -->
+<mapper namespace="UserMapper01">
+
+<!-- User user = (User)session.selectOne("UserMapper01.getUser", "user01"); -->
+   <select id="getUser" parameterType="string" resultType="user">
+       SELECT
+       user_id AS userId,
+       user_name AS userName, 
+       password, 
+       age, 
+       grade, 
+       reg_date AS regDate
+       FROM users
+<!--   WHERE user_id LIKE #{VALUE} -->
+       WHERE user_id = #{VALUE}
+   </select>
+   
+<!-- String name = (String)session.selectOne("UserMapper01.findUserId", user); -->
+   <select id="findUserId" parameterType="user" resultType="string">
+      SELECT
+      user_name
+      FROM
+      users
+      WHERE user_id = #{userId} <!-- user.getUserId() -->
+      AND password = #{password}
+   </select>
+</mapper>
+```
+
+
+
+#### MyBatisTestApp01.java
+
+* UserMapper01은 namespace, getuser는 id, "user"는 String
+* getUserList는 UserMapper
+* getUser / findUserId는 UserMapper01
+
+```java
+package ibatis.services.user.test;
+
+import ibatis.services.domain.User;
+
+import java.io.Reader;
+import java.util.List;
+
+import org.apache.ibatis.io.Resources;
+import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.apache.ibatis.session.SqlSessionFactoryBuilder;
+
+/*
+ * FileName : MyBatisTestApp01.java
+  * ㅇ SqlMapConfig01.xml / mybatis-userservice-mapping01.xml
+  * ㅇ MyBATIS Framework 이용 QUERY ( SELECT ) TEST 
+  */
+public class MyBatisTestApp01 {
+   public static void main(String[] args) throws Exception{
+      
+      ///==> SqlMapConfig01.xml : MyBATIS Framework 의 핵심 환경설정화일 (MetaData)
+      //==> mybatis-userservice-mapping.xml : SQL 를 갖는 설정화일 (MetaData) 
+      
+      //==> 1. xml metadata 읽는 Stream 생성
+      Reader reader=Resources.getResourceAsReader("config/SqlMapConfig.xml");
+      //==> 2. Reader 객체를 이용 xml metadata 에 설정된 각정 정보를 접근, 사용가능한 
+      //==>     SqlMapClient  객체 생성
+      
+      SqlSessionFactory factory=new SqlSessionFactoryBuilder().build(reader);
+      
+      
+      SqlSession session=factory.openSession();
+      List<User> list=session.selectList("UserMapper.getUserList");
+      
+      //0. getUserList :: 모든 user 정보
+      System.out.println(":: 0. all User(SELECT)  ? ");
+      
+      for (int i =0 ;  i < list.size() ; i++) {
+         System.out.println( "<"+ ( i +1 )+"> 번째 회원.."+ list.get(i).toString() );
+      }
+      System.out.println("\n");
+
+      //1. getUser :: 특정 userid 정보
+      User user = (User)session.selectOne("UserMapper01.getUser", "user01");
+      //id가 user01인 user를 찾음. return name
+      System.out.println(":: 1. get(SELECT)  ? "+user.toString());
+      System.out.println("\n");
+      
+      //2. findUserId :: 특정 userid / password 정보
+      user.setUserId("user03");
+      user.setPassword("user03");
+      String name = (String)session.selectOne("UserMapper01.findUserId", user);
+      //id가 user03이면서 pass가 user03인 사람을 찾는 것. return name
+      System.out.println(":: 2. get(SELECT)  ? "+name);
+   }//end of main
+}//end of class
+```
+
+```
+:: 0. all User(SELECT)  ? 
+<1> 번째 회원..User [userid=mybatis01, userName=홍길동iba, password=mybatis01, age=10, grade=1, active=false, regDate=2019-10-08 09:00:00.0]
+<2> 번째 회원..User [userid=mybatis02, userName=이순신iba, password=mybatis02, age=20, grade=2, active=false, regDate=2019-10-07 09:00:00.0]
+<3> 번째 회원..User [userid=mybatis03, userName=김유신iba, password=mybatis03, age=30, grade=3, active=false, regDate=2019-10-02 09:00:00.0]
+<4> 번째 회원..User [userid=user01, userName=홍길동, password=user01, age=10, grade=1, active=false, regDate=2019-10-11 09:00:00.0]
+<5> 번째 회원..User [userid=user02, userName=이순신, password=user02, age=20, grade=2, active=false, regDate=2019-10-12 09:00:00.0]
+<6> 번째 회원..User [userid=user03, userName=김유신, password=user03, age=30, grade=3, active=false, regDate=2019-10-09 09:00:00.0]
+
+
+:: 1. get(SELECT)  ? User [userid=user01, userName=홍길동, password=user01, age=10, grade=1, active=false, regDate=2019-10-11 09:00:00.0]
+
+
+:: 2. get(SELECT)  ? 김유신
+```
+
+
+
+### 3)
+
+#### SqlMapConfig.xml
+
+* `mapping02.xml` 추가
+
+```xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+   "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+   <!-- 1. db정보를 가지고 온다. -->
+   <properties resource="config/dbconn.properties"/>
+   
+   
+   <!-- 2. vo를 alias.... -->
+   <typeAliases>
+      <typeAlias type="ibatis.services.domain.User" alias="user"/>
+   </typeAliases>
+   
+   
+   <!-- 3. jdbc 환경 구축 -->
+   <environments default="mulcam">
+      <environment id="mulcam" >
+         <transactionManager type="JDBC"/>
+         <dataSource type="UNPOOLED">
+            <property name="driver" value="${jdbc.mysql.driver}"/>
+            <property name="url" value="${jdbc.mysql.url}"/>
+            <property name="username" value="${jdbc.mysql.username}"/>
+            <property name="password" value="${jdbc.mysql.password}"/>
+         
+         </dataSource>
+      </environment>
+   </environments>
+   <!--4. sql mapper -->
+   <mappers>
+      <mapper resource="sql/mybatis-userservice-mapping.xml"/>
+      <mapper resource="sql/mybatis-userservice-mapping01.xml"/>
+      <mapper resource="sql/mybatis-userservice-mapping02.xml"/>
+   </mappers>
+</configuration>
+```
+
+
+
+#### mybatis-userservice-mapping02.xml
+
+```
+<!-- List<User> list = session.selectList("UserMapper02.getUser01","user");
+	 여기서 "user"는 string -> parameterType / resultType은 list의 제너릭인 user 
+	 list = session.selectList("UserMapper02.getUser01","user%");
+	  "user"로 시작하는 사람 -> % like연산자 -->
+```
+
+
+
+```xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 
+	 #{VALUE} : parameterType이 단순값으로 들어올 때  사용함...string
+	 #{userId} : parameterType이 user라면...
+	 ::
+	 와일드 카드와  LIKE 연산자 쿼리문 사용하는 방법
+	 1) user_id가 특정한 값으로 시작하는 user를 검색하는 방법
+	 user_id LIKE     #{VALUE} '%'
+	 user_id LIKE     #{userId} '%'
+	 
+	 2) user_id가 특정한 값으로 끝나는 user를 검색하는 방법
+	 user_id LIKE '%' #{VALUE}
+	 user_id LIKE '%' #{userId}
+	 
+	 3) user_id가 특정한 값을 포함하는 user를 검색하는 방법
+	 user_id LIKE '%' #{VALUE} '%'
+	 user_id LIKE '%' #{userId} '%' 			-->
+ 
+ 
+<!-- SQL definition -->
+<mapper namespace="UserMapper02">
+
+<!-- List<User> list = session.selectList("UserMapper02.getUser01","user"); 
+	 list = session.selectList("UserMapper02.getUser01","user%"); -->
+   <select id="getUser01" parameterType="string" resultType="user">
+       SELECT
+       user_id AS userId,
+       user_name AS userName, 
+       password, 
+       age, 
+       grade, 
+       reg_date AS regDate
+       FROM users
+       WHERE user_id LIKE #{VALUE} 
+<!--   WHERE user_id = #{VALUE} :: 여기서는 = 사용 불가, LIKE! -->
+   </select>
+   
+<!-- list = session.selectList("UserMapper02.getUser02",user); -->   
+   <select id="getUser02" parameterType="user" resultType="user">
+       SELECT
+       user_id AS userId,
+       user_name AS userName, 
+       password, 
+       age, 
+       grade, 
+       reg_date AS regDate
+       FROM users
+       WHERE user_id LIKE #{userId} <!-- user.getUserId() -->
+   </select>
+   
+<!-- list = session.selectList("UserMapper02.getUser03","user"); -->
+   <select id="getUser03" parameterType="string" resultType="user">
+       SELECT
+       user_id AS userId,
+       user_name AS userName, 
+       password, 
+       age, 
+       grade, 
+       reg_date AS regDate
+       FROM users
+       WHERE user_id LIKE #{VALUE} '%' <!-- 단순 파라미터 값 / 와일드카드 뒤에 ! user% -->
+   </select>
+   
+<!-- list = session.selectList("UserMapper02.getUser04",user); -->
+   <select id="getUser04" parameterType="user" resultType="user">
+       SELECT
+       user_id AS userId,
+       user_name AS userName, 
+       password, 
+       age, 
+       grade, 
+       reg_date AS regDate
+       FROM users
+       WHERE user_id LIKE '%' #{userId} '%' <!-- 단순 파라미터 값 / 와일드카드 앞에 ! %01 -->
+   </select>
+
+</mapper>
+```
+
+
+
+
+
+#### MyBatisTestApp02.java
+
+```java
+package ibatis.services.user.test;
+
+import ibatis.services.domain.User;
+
+import java.io.Reader;
+import java.util.List;
+
+import org.apache.ibatis.io.Resources;
+import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.apache.ibatis.session.SqlSessionFactoryBuilder;
+
+/*
+ * FileName : MyBatisTestApp02.java
+  * ㅇ SqlMapConfig01.xml / mybatis-userservice-mapping02.xml
+  * ㅇ My Framework 이용 QUERY ( SELECT ) TEST 
+  */
+public class 	MyBatisTestApp02 {
+	///Main method
+	public static void main(String[] args) throws Exception{
+		
+		///==> SqlMapConfig01.xml : MyBATIS Framework 의 핵심 환경설정화일 (MetaData)
+		//==> mybatis-userservice-mapping02.xml : SQL 를 갖는 설정화일 (MetaData) 
+				
+		
+		//==> 1. xml metadata 읽는 Stream 생성
+		Reader reader=Resources.getResourceAsReader("config/SqlMapConfig.xml");
+		
+		//==> 2. Reader 객체를 이용 xml metadata 에 설정된 각정 정보를 접근, 사용가능한 
+		//==>     SqlMapClient  객체 생성
+		SqlSessionFactory factory=new SqlSessionFactoryBuilder().build(reader);
+		SqlSession session=factory.openSession();
+		
+		//0. getUser :: # 대입자를 이용한 like 연산자 검색 
+		//				==> 검색결과 없는것 확인
+		System.out.println(":: 0. user로시작하는 userId User(SELECT)  ? ");
+		List<User> list = session.selectList("UserMapper02.getUser01","user");
+		for (int i =0 ;  i < list.size() ; i++) {
+			System.out.println( "<"+ ( i +1 )+"> 번째 회원.."+ list.get(i).toString() );
+		}
+		System.out.println("\n");
+		
+		//1. getUser :: # 대입자를 이용한 like 연산자 검색 
+		// 				==> 검색결과 존재 확인 :: %와일드카드 쿼리문이 아닌 값에 직접 입력하는 경우
+		System.out.println(":: 1. user로시작하는 userId User(SELECT)  ? ");
+		list = session.selectList("UserMapper02.getUser01","user%");
+		for (int i =0 ;  i < list.size() ; i++) {
+			System.out.println( "<"+ ( i +1 )+"> 번째 회원.."+ list.get(i).toString() );
+		}
+		System.out.println("\n");
+		
+	
+		//2. getUser :: # 대입자를 이용한 like 연산자 검색 
+		//				==> 검색결과 없는것 확인
+		User user = new User();
+		user.setUserId("01");
+		
+		System.out.println(":: 2. 01로 끝나는 userId User(SELECT)  ? ");
+		 list = session.selectList("UserMapper02.getUser02",user);
+		for (int i =0 ;  i < list.size() ; i++) {
+			System.out.println( "<"+ ( i +1 )+"> 번째 회원.."+ list.get(i).toString() );
+		}
+		System.out.println("\n");
+		
+		
+		//3. getUser :: # 대입자를 이용한  like 연산자 검색 
+		//				==> 검색결과 존재 확인 :: %와일드카드 직접 입력하는 경우 
+		user.setUserId("%01");	
+		System.out.println(":: 3. 01로 끝나는 userId User(SELECT)  ? ");
+		list = session.selectList("UserMapper02.getUser02",user);
+		for (int i =0 ;  i < list.size() ; i++) {
+			System.out.println( "<"+ ( i +1 )+"> 번째 회원.."+ list.get(i).toString() );
+		}
+		System.out.println("\n");
+		
+		
+		//4. getUser :: $ 대입자를 이용한 like 연산자 검색
+		//				==> 검색결과 존재 확인 :: %와일드카드 쿼리문에 입력하는 경우  
+		System.out.println(":: 4. user로시작하는 userId User(SELECT)  ? ");
+		list = session.selectList("UserMapper02.getUser03","user");
+		for (int i =0 ;  i < list.size() ; i++) {
+			System.out.println( "<"+ ( i +1 )+"> 번째 회원.."+ list.get(i).toString() );
+		}
+		System.out.println("\n");
+		
+		
+	
+		//5. getUser :: $ 대입자를 이용한 like 연산자 검색
+		//		==> 검색결과 존재 확인 :: %와일드카드 쿼리문에 입력하는 경우  
+		user.setUserId("01");
+		System.out.println(":: 5. 01로 끝나는 userId User(SELECT)  ? ");
+		list = session.selectList("UserMapper02.getUser04",user);
+		for (int i =0 ;  i < list.size() ; i++) {
+			System.out.println( "<"+ ( i +1 )+"> 번째 회원.."+ list.get(i).toString() );
+		}
+		System.out.println("\n");
+	
+	}//end of main
+}//end of class
+```
+
+```
+:: 0. user로시작하는 userId User(SELECT)  ? 
+
+
+:: 1. user로시작하는 userId User(SELECT)  ? 
+<1> 번째 회원..User [userid=user01, userName=홍길동, password=user01, age=10, grade=1, active=false, regDate=2019-10-11 09:00:00.0]
+<2> 번째 회원..User [userid=user02, userName=이순신, password=user02, age=20, grade=2, active=false, regDate=2019-10-12 09:00:00.0]
+<3> 번째 회원..User [userid=user03, userName=김유신, password=user03, age=30, grade=3, active=false, regDate=2019-10-09 09:00:00.0]
+
+
+:: 2. 01로 끝나는 userId User(SELECT)  ? 
+
+
+:: 3. 01로 끝나는 userId User(SELECT)  ? 
+<1> 번째 회원..User [userid=mybatis01, userName=홍길동iba, password=mybatis01, age=10, grade=1, active=false, regDate=2019-10-08 09:00:00.0]
+<2> 번째 회원..User [userid=user01, userName=홍길동, password=user01, age=10, grade=1, active=false, regDate=2019-10-11 09:00:00.0]
+
+
+:: 4. user로시작하는 userId User(SELECT)  ? 
+<1> 번째 회원..User [userid=user01, userName=홍길동, password=user01, age=10, grade=1, active=false, regDate=2019-10-11 09:00:00.0]
+<2> 번째 회원..User [userid=user02, userName=이순신, password=user02, age=20, grade=2, active=false, regDate=2019-10-12 09:00:00.0]
+<3> 번째 회원..User [userid=user03, userName=김유신, password=user03, age=30, grade=3, active=false, regDate=2019-10-09 09:00:00.0]
+
+
+:: 5. 01로 끝나는 userId User(SELECT)  ? 
+<1> 번째 회원..User [userid=mybatis01, userName=홍길동iba, password=mybatis01, age=10, grade=1, active=false, regDate=2019-10-08 09:00:00.0]
+<2> 번째 회원..User [userid=user01, userName=홍길동, password=user01, age=10, grade=1, active=false, regDate=2019-10-11 09:00:00.0]
+```
+
+
+
+
+
+## 4.
