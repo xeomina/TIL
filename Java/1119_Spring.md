@@ -46,9 +46,31 @@
 
 
 
-## 2.
+## 2. SqlSessionFactory / SqlSession
 
 > sp03_MyBatis ...이어서
+
+
+
+```
+					 SqlSessionFactory -> SqlSession
+ 							  SqlSession
+ 
+ sql query												execute method
+INSERT INTO ~			------------------>			insert("namespace.id", vo);	
+DELETE FROM ~			------------------>			delete("namespace.id", pk);					
+UPDATE table ~			------------------>			update("namespace.id", vo);	
+----------------------------------------------------------------------------------------------
+SELECT * FROM			------------------>			List<T> selectlist("namespace.id");
+						------------------>			List<T> selectlist("namespace.id","서울");
+SELECT * FROM WHERE ~	------------------>			Object selectone("namespace.id",pk);
+```
+
+
+
+#### Command
+
+* mysawon 테이블 확인
 
 ```
 mysql> SELECT * FROM mysawon;
@@ -135,25 +157,6 @@ public class MySawonTestApp02 {
 ```
 MySawon [num=2, age=22, id=dorosh, pwd=null, name=도로시, hiredate=2021-11-18]
 MySawon [num=1, age=66, id=hahash, pwd=null, name=하야시, hiredate=2021-11-18]
-
-```
-
-
-
-
-
-```
-					 SqlSessionFactory -> SqlSession
- 							  SqlSession
- 
- sql query												execute method
-INSERT INTO ~			------------------>			insert("namespace.id", vo);	
-DELETE FROM ~			------------------>			delete("namespace.id", pk);					
-UPDATE tanble ~			------------------>			update("namespace.id", vo);	
-----------------------------------------------------------------------------------------------
-SELECT * FROM			------------------>			List<T> selectlist("namespace.id");
-						------------------>			List<T> selectlist("namespace.id","서울");
-SELECT * FROM WHERE ~	------------------>			Object selectone("namespace.id",pk);
 ```
 
 
@@ -192,8 +195,7 @@ public class FactoryService {
 	public static SqlSessionFactory getFactory() {
 		return factory;
 	}
-
-}
+}//
 ```
 
 
@@ -214,7 +216,7 @@ import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 import com.edu.mybatis.vo.MySawon;
 
 /*
- * SqlSessionFactory 생성부분과
+ * SqlSessionFactory 생성 부분과
  * SqlSession 반환받아서 로직 호출하는 부분을 나눠서 작성...
  */
 
@@ -246,7 +248,7 @@ MySawon [num=1, age=66, id=hahash, pwd=null, name=하야시, hiredate=2021-11-18
 
 ### 1) 
 
-Command
+#### Command
 
 * source 불러오기
 
@@ -349,9 +351,7 @@ mysql> desc users;
 	 	- SQL/Query 의 별칭(Alias)와 UserVO객체의 Field 의 변수이름이 동일한 것 확인. -->
  	
 	<!-- id=getUserList -->
-	<!-- SELECT에서 컬럼명과 필드명이 다르면 값을 못받아온다...Alias 사용해서 문제 해결 -->
-	<!-- 
-	select 에서 컬럼명과 필드명이 다르면 값을 못받아온다.. 알리야스를 사용해서 이 문제를 해결한다.
+	<!-- SELECT에서 컬럼명과 필드명이 다르면 값을 못받아온다...Alias 사용해서 문제 해결 
 	select 절에서의 컬럼이름은 vo alias 이름과 상호 호환된다.
 	user_id ====   setUserId() | getUserId()     X
 	userId  ====   setUserId() | getUserId()     O
@@ -378,6 +378,8 @@ mysql> desc users;
 
 * 해당 클래스를 resultType로 지정해주시면 그 클래스를 제네릭으로 지니는 리스트가 리턴
 * Arraylist가 아닌 그안에 들어있는 객체 - 제네릭 ???
+* parameterType부분은 인자값이랑 관련있는거여서 스트링아니면 객체일떈 user로 썼고
+* resultType부분에는 제네릭을 쓴다 이렇게 이해했는데
 
 
 
@@ -581,25 +583,25 @@ import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 
-/*
+/**
  * FileName : MyBatisTestApp01.java
   * ㅇ SqlMapConfig01.xml / mybatis-userservice-mapping01.xml
   * ㅇ MyBATIS Framework 이용 QUERY ( SELECT ) TEST 
   */
+
 public class MyBatisTestApp01 {
    public static void main(String[] args) throws Exception{
       
-      ///==> SqlMapConfig01.xml : MyBATIS Framework 의 핵심 환경설정화일 (MetaData)
+      //==> SqlMapConfig01.xml : MyBATIS Framework 의 핵심 환경설정화일 (MetaData)
       //==> mybatis-userservice-mapping.xml : SQL 를 갖는 설정화일 (MetaData) 
       
       //==> 1. xml metadata 읽는 Stream 생성
       Reader reader=Resources.getResourceAsReader("config/SqlMapConfig.xml");
+     
       //==> 2. Reader 객체를 이용 xml metadata 에 설정된 각정 정보를 접근, 사용가능한 
-      //==>     SqlMapClient  객체 생성
+      //==>    SqlMapClient  객체 생성
       
       SqlSessionFactory factory=new SqlSessionFactoryBuilder().build(reader);
-      
-      
       SqlSession session=factory.openSession();
       List<User> list=session.selectList("UserMapper.getUserList");
       
@@ -623,6 +625,7 @@ public class MyBatisTestApp01 {
       String name = (String)session.selectOne("UserMapper01.findUserId", user);
       //id가 user03이면서 pass가 user03인 사람을 찾는 것. return name
       System.out.println(":: 2. get(SELECT)  ? "+name);
+      
    }//end of main
 }//end of class
 ```
@@ -802,24 +805,24 @@ import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 
-/*
+/**
  * FileName : MyBatisTestApp02.java
   * ㅇ SqlMapConfig01.xml / mybatis-userservice-mapping02.xml
   * ㅇ My Framework 이용 QUERY ( SELECT ) TEST 
   */
-public class 	MyBatisTestApp02 {
+
+public class MyBatisTestApp02 {
 	///Main method
 	public static void main(String[] args) throws Exception{
 		
-		///==> SqlMapConfig01.xml : MyBATIS Framework 의 핵심 환경설정화일 (MetaData)
+		//==> SqlMapConfig01.xml : MyBATIS Framework 의 핵심 환경설정화일 (MetaData)
 		//==> mybatis-userservice-mapping02.xml : SQL 를 갖는 설정화일 (MetaData) 
 				
-		
 		//==> 1. xml metadata 읽는 Stream 생성
 		Reader reader=Resources.getResourceAsReader("config/SqlMapConfig.xml");
 		
 		//==> 2. Reader 객체를 이용 xml metadata 에 설정된 각정 정보를 접근, 사용가능한 
-		//==>     SqlMapClient  객체 생성
+		//==>    SqlMapClient  객체 생성
 		SqlSessionFactory factory=new SqlSessionFactoryBuilder().build(reader);
 		SqlSession session=factory.openSession();
 		
@@ -965,6 +968,208 @@ public class 	MyBatisTestApp02 {
       <mapper resource="sql/mybatis-userservice-mapping03.xml"/>
    </mappers>
 </configuration>
+```
+
+
+
+#### mybatis-userservice-mapping03.xml
+
+```xml
+
+
+```
+
+
+
+#### MyBatisTestApp03.java
+
+```java
+package ibatis.services.user.test;
+
+import ibatis.services.domain.User;
+
+import java.io.Reader;
+import java.util.List;
+
+import org.apache.ibatis.io.Resources;
+import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.apache.ibatis.session.SqlSessionFactoryBuilder;
+
+/**
+ * FileName : MyBatisTestApp03.java
+  * ㅇ SqlMapConfig01.xml / mybatis-userservice-mapping03.xml
+  * ㅇ My Framework 이용 QUERY ( SELECT ) TEST 
+  */
+
+public class MyBatisTestApp03 {
+	///Main method
+	public static void main(String[] args) throws Exception{
+		
+		//==> SqlMapConfig.xml : MyBATIS Framework 의 핵심 환경설정화일 (MetaData)
+		//==> mybatis-userservice-mapping.xml : SQL 를 갖는 설정화일 (MetaData) 
+		
+		//==> 1. xml metadata 읽는 Stream 생성
+		Reader reader=Resources.getResourceAsReader("config/SqlMapConfig.xml");
+		
+		//==> 2. Reader 객체를 이용 xml metadata 에 설정된 각정 정보를 접근, 사용가능한 
+		//==>    SqlSession  객체 생성
+		SqlSessionFactory factory=new SqlSessionFactoryBuilder().build(reader);
+		SqlSession session=factory.openSession();
+		
+		//0. User01.getUserList 
+		System.out.println(":: 0. getUserList(SELECT)  ? ");
+		List<User> list = session.selectList("UserMapper.getUserList");						//mapping.xml
+		for (int i =0 ;  i < list.size() ; i++) {
+			System.out.println( "<"+ ( i +1 )+"> 번째 회원.."+ list.get(i).toString() );
+		}
+		System.out.println("\n");
+		
+		
+		//==> Test용 UserVO instance 생성
+		User user = new User("user04","주몽","user04",40,4);
+		
+		//1.User03.addUser Test
+		Object obj = session.insert("UserMapper03.addUser", user);
+		session.commit(); //이 부분 반드시 해줘야 한다....mvc에서는 생략가능.
+		//iBatis와 다르게 insert문의 리턴타입은 insert된 row수를 반환한다.
+		System.out.println(":: 1. addUser(INSERT)  result ? "+obj); 						//1: db에 추가된 rows
+		System.out.println("\n");
+		
+		
+		
+		//2.User01.findUserId Test
+		String userName = (String)session.selectOne("UserMapper01.findUserId", user);		//mapping01.xml
+		System.out.println(":: 2. findUserId(SELECT)  ? "+userName); 						//주몽 
+		System.out.println("\n");
+			
+		
+		//3.User03.updateUser Test
+		user.setUserName("장보고");
+		int updateResult = session.update("UserMapper03.updateUser", user);
+		session.commit(); //이부분 반드시 해줘야 한다.
+		System.out.println(":: 3. updateUser(UPDATE) result ? "+updateResult);				//1: db에 추가된 rows
+		System.out.println("\n");
+		
+			
+		//4.User01.findUserId Test
+		userName = (String)session.selectOne("UserMapper01.findUserId", user);
+		System.out.println(":: 4. findUserId(SELECT)  ? "+userName); 						//장보고
+		System.out.println("\n");
+		
+		
+		//5.User03.removeUser Test
+		int deleteResult = session.delete("UserMapper03.removeUser", user.getUserId());
+		session.commit(); //이 부분 반드시 해줘야 한다.
+		System.out.println(":: 5. removeUser(DELETE) result ? "+deleteResult);
+		System.out.println("\n");
+		
+		
+		//6. User01.getUserList 
+		System.out.println(":: 6. getUserList(SELECT)  ? ");
+		 list = session.selectList("UserMapper.getUserList");
+		for (int i =0 ;  i < list.size() ; i++) {
+			System.out.println( "<"+ ( i +1 )+"> 번째 회원.."+ list.get(i).toString() );
+		}
+		
+	}//end of main
+}//end of class
+```
+
+
+
+```
+:: 0. getUserList(SELECT)  ? 
+<1> 번째 회원..User [userid=mybatis01, userName=홍길동iba, password=mybatis01, age=10, grade=1, active=false, regDate=2019-10-08 09:00:00.0]
+<2> 번째 회원..User [userid=mybatis02, userName=이순신iba, password=mybatis02, age=20, grade=2, active=false, regDate=2019-10-07 09:00:00.0]
+<3> 번째 회원..User [userid=mybatis03, userName=김유신iba, password=mybatis03, age=30, grade=3, active=false, regDate=2019-10-02 09:00:00.0]
+<4> 번째 회원..User [userid=user01, userName=홍길동, password=user01, age=10, grade=1, active=false, regDate=2019-10-11 09:00:00.0]
+<5> 번째 회원..User [userid=user02, userName=이순신, password=user02, age=20, grade=2, active=false, regDate=2019-10-12 09:00:00.0]
+<6> 번째 회원..User [userid=user03, userName=김유신, password=user03, age=30, grade=3, active=false, regDate=2019-10-09 09:00:00.0]
+
+
+:: 1. addUser(INSERT)  result ? 1
+
+
+:: 2. findUserId(SELECT)  ? 주몽
+
+
+:: 3. updateUser(UPDATE) result ? 1
+
+
+:: 4. findUserId(SELECT)  ? 장보고
+
+
+:: 5. removeUser(DELETE) result ? 1
+
+
+:: 6. getUserList(SELECT)  ? 
+<1> 번째 회원..User [userid=mybatis01, userName=홍길동iba, password=mybatis01, age=10, grade=1, active=false, regDate=2019-10-08 09:00:00.0]
+<2> 번째 회원..User [userid=mybatis02, userName=이순신iba, password=mybatis02, age=20, grade=2, active=false, regDate=2019-10-07 09:00:00.0]
+<3> 번째 회원..User [userid=mybatis03, userName=김유신iba, password=mybatis03, age=30, grade=3, active=false, regDate=2019-10-02 09:00:00.0]
+<4> 번째 회원..User [userid=user01, userName=홍길동, password=user01, age=10, grade=1, active=false, regDate=2019-10-11 09:00:00.0]
+<5> 번째 회원..User [userid=user02, userName=이순신, password=user02, age=20, grade=2, active=false, regDate=2019-10-12 09:00:00.0]
+<6> 번째 회원..User [userid=user03, userName=김유신, password=user03, age=30, grade=3, active=false, regDate=2019-10-09 09:00:00.0]
+
+```
+
+
+
+> INSERT
+
+```
+mysql> SELECT * FROM users;
++-----------+-----------+-----------+------+-------+------------+
+| user_id   | user_name | password  | age  | grade | reg_date   |
++-----------+-----------+-----------+------+-------+------------+
+| mybatis01 | 홍길동iba | mybatis01 |   10 |     1 | 2019-10-08 |
+| mybatis02 | 이순신iba | mybatis02 |   20 |     2 | 2019-10-07 |
+| mybatis03 | 김유신iba | mybatis03 |   30 |     3 | 2019-10-02 |
+| user01    | 홍길동    | user01    |   10 |     1 | 2019-10-11 |
+| user02    | 이순신    | user02    |   20 |     2 | 2019-10-12 |
+| user03    | 김유신    | user03    |   30 |     3 | 2019-10-09 |
+| user04    | 주몽      | user04    |   40 |     4 | NULL       |
++-----------+-----------+-----------+------+-------+------------+
+7 rows in set (0.00 sec)
+```
+
+
+
+> UPDATE
+
+```
+mysql> SELECT * FROM users;
++-----------+-----------+-----------+------+-------+------------+
+| user_id   | user_name | password  | age  | grade | reg_date   |
++-----------+-----------+-----------+------+-------+------------+
+| mybatis01 | 홍길동iba | mybatis01 |   10 |     1 | 2019-10-08 |
+| mybatis02 | 이순신iba | mybatis02 |   20 |     2 | 2019-10-07 |
+| mybatis03 | 김유신iba | mybatis03 |   30 |     3 | 2019-10-02 |
+| user01    | 홍길동    | user01    |   10 |     1 | 2019-10-11 |
+| user02    | 이순신    | user02    |   20 |     2 | 2019-10-12 |
+| user03    | 김유신    | user03    |   30 |     3 | 2019-10-09 |
+| user04    | 장보고    | user04    |   40 |     4 | NULL       |
++-----------+-----------+-----------+------+-------+------------+
+7 rows in set (0.00 sec)
+```
+
+
+
+> DELETE
+
+```
+mysql> SELECT * FROM users;
++-----------+-----------+-----------+------+-------+------------+
+| user_id   | user_name | password  | age  | grade | reg_date   |
++-----------+-----------+-----------+------+-------+------------+
+| mybatis01 | 홍길동iba | mybatis01 |   10 |     1 | 2019-10-08 |
+| mybatis02 | 이순신iba | mybatis02 |   20 |     2 | 2019-10-07 |
+| mybatis03 | 김유신iba | mybatis03 |   30 |     3 | 2019-10-02 |
+| user01    | 홍길동    | user01    |   10 |     1 | 2019-10-11 |
+| user02    | 이순신    | user02    |   20 |     2 | 2019-10-12 |
+| user03    | 김유신    | user03    |   30 |     3 | 2019-10-09 |
++-----------+-----------+-----------+------+-------+------------+
+6 rows in set (0.00 sec)
 ```
 
 
