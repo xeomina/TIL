@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="MemberMapper">
+
+<!-- Object obj = session.insert("MemberMapper.registerMember", memberVO); -->
+	<insert id="registerMember" parameterType="memberVO">
+		INSERT INTO
+		member (id, password, name, address)
+		VALUES (#{id},#{password},#{name},#{address})
+	</insert>
+	
+<!-- int deleteResult = session.delete("MemberMapper.deleteMember", memberVO.getId()); -->
+	<delete id="deleteMember" parameterType="memberVO">
+		DELETE FROM
+		member
+		WHERE id = #{id}
+	</delete>
+	
+<!-- int updateResult = session.update("MemberMapper.updateMember", memberVO); -->	
+	<update id="updateMember" parameterType="memberVO">
+		UPDATE
+		member
+		SET name = #{name}, address = #{address}
+		WHERE id = #{id}
+	</update>
+
+<!-- String name = (String)session.selectOne("MemberMapper.getMember", memberVO); -->	
+	<select id="getMember" parameterType="memberVO" resultType="string">
+		SELECT 
+		name
+		FROM member
+		WHERE id = #{id}
+<!-- 	WHERE id LIKE #{id} -->
+	
+	</select>
+
+<!-- list = session.selectList("MemberMapper.showAllMember"); -->	
+	<select id="showAllMember" parameterType="memberVO" resultType="memberVO">
+		SELECT 
+		id, password, name, address
+		FROM member
+	</select>
+
+
+</mapper>

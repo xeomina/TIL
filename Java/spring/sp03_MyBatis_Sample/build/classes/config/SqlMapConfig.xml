@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+ PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<!-- MyBatis에서 핵심이 되는 설정문서... -->
+ <configuration>
+ 
+ <!-- 1.DB정보 wiring -->
+ <properties resource="config/dbconn.properties"/>
+ 
+ <!-- 2.vo정보 wiring  -->
+ <typeAliases>
+ 	<typeAlias type="com.edu.mybatis.vo.MySawon" alias="mySawon"/> 		<!-- vo의 FQCN - alias vo만 소문자로-->
+ </typeAliases>
+ 
+ <!-- 3.JDBC 환경구축  -->
+ <environments default="DEVELOPMENT">
+	<environment id="DEVELOPMENT">										<!-- default/id 반드시! - 똑같이 준다 -->
+		<transactionManager type="JDBC"/>
+		<dataSource type="UNPOOLED">  									<!-- DriveManager 방식 - 연결 아직 x -->
+			<property name="driver" value="${jdbc.mysql.driver}"/>		<!-- property 무조건 ! - value는 EL로 연결 -->
+			<property name="url" value="${jdbc.mysql.url}"/>
+			<property name="username" value="${jdbc.mysql.username}"/>
+			<property name="password" value="${jdbc.mysql.password}"/>
+		</dataSource>
+	</environment> 								
+ </environments>
+ 
+  <!-- 4.SQL쿼리문 Mapper -->
+ <mappers>
+ 	<mapper resource="sql/mysawon_mapping.xml"/>
+ </mappers>
+ </configuration>

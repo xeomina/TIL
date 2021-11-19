@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="sawonMapper">
+	<insert id="sawonAdd" parameterType="mySawon"> <!-- mySawon: vo alias -->
+		INSERT
+		INTO mysawon (id,pwd,name,age,hiredate) <!-- num은 알아서 생성 - 절대 넣지 x -->
+<!-- 폼으로부터 받은 값 -> VO 생성 - 비즈니스 로직에 인자값 -> 뽑아서 집어넣기
+	-> VO에서 뽑을때 get -> MyBatis에서 getter는 #{} :: VALUE(#{id}) = mysawon.getId !! -->
+		VALUE(#{id},#{pwd},#{name},#{age},curDate()) <!-- curDate() 자동으로 현재날짜 불러오는 함수 -->
+		
+	</insert>
+	
+	<select id="sawonList" resultType="mySawon"> <!-- param 필요없음, resultType : ArrayList -->
+		SELECT
+		num, id, name, age, hiredate
+		FROM mysawon
+		ORDER BY num DESC
+	</select>
+
+</mapper>

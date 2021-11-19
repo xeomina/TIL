@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://www.springframework.org/schema/beans 
+												 http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+<!-- 가지고 놀 주사위 3개를 생성하는 주문서를 먼저 작성 
+	 player01이라는 이름으로 player 객체를 생성하는 빈도 작성 -->     
+
+<!-- <bean id = "diceA" class = "spring.service.dice.impl.DiceAImpl"></bean> -->   
+	<bean id = "diceA" class = "spring.service.dice.impl.DiceAImpl"/>
+	<bean id = "diceB" class = "spring.service.dice.impl.DiceBImpl"/>
+	<bean id = "diceC" class = "spring.service.dice.impl.DiceCImpl"/>
+	<bean id = "diceD" class = "spring.service.dice.impl.DiceDImpl"/>
+
+<!-- 클래스..필드..주입의 통로 :: 생성자, setter -->
+
+<!-- player01 이름으로 빈을 생성 :: 사용자 정의 빈 :: diceA를 생성자 주입-->
+	<bean id = "player01" class = "spring.service.dice.play.Player02">
+		<constructor-arg ref = "diceA"/>
+	</bean>
+
+<!-- player02 이름으로 빈을 생성 :: 사용자 정의 빈 :: diceB를 생성자 주입-->
+	<bean id = "player02" class = "spring.service.dice.play.Player02">
+		<constructor-arg ref = "diceB"/>
+	</bean>
+	
+<!-- player03 이름으로 빈을 생성 :: 사용자 정의 빈 :: diceC를 setter 주입-->
+	<bean id = "player03" class = "spring.service.dice.play.Player02">
+		<property name="dice" ref = "diceC"/>
+	</bean>
+	
+<!-- player04 이름으로 빈을 생성 :: 사용자 정의 빈 :: diceA를 setter 주입-->
+	<bean id = "player04" class = "spring.service.dice.play.Player02">
+		<property name="dice" ref = "diceA"/>
+	</bean>
+	
+<!-- player 이름으로 빈을 생성 :: 사용자 정의 빈 :: diceD를 setter 주입-->
+	<bean id = "player" class = "spring.service.dice.play.Player02">
+		<property name="dice" ref = "diceD"/>
+	</bean>
+
+</beans>
+
+
+
+
+
+
+
+

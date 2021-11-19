@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 
+	CRUD를 완벽하게 구현
+	C : INSERT
+	R : SELECT
+	U : UPDATE
+	D : DELETE
+ -->
+ 
+<mapper namespace="UserMapper03">
+<!-- 1) Object obj = session.insert("UserMapper03.addUser", user); -->
+   <select id="addUser" parameterType="user"> <!-- resultType 없음 --> 
+       INSERT INTO
+       users (user_id, user_name, password, age, grade)
+       VALUES (#{userId},#{userName},#{password},#{age},#{grade})
+   </select>
+   
+<!-- 3) int updateResult = session.update("UserMapper03.updateUser", user); -->
+   <select id="updateUser" parameterType="user"> <!-- resultType 없음 --> 
+       UPDATE
+       users 
+       SET user_name = #{userName}, password = #{password}, age = #{age}
+       WHERE user_id = #{userId}
+   </select>
+
+<!-- 5) int deleteResult = session.delete("UserMapper03.removeUser", user.getUserId()); -->
+   <select id="removeUser" parameterType="user"> <!-- resultType 없음 --> 
+       DELETE FROM
+       users 
+       WHERE user_id = #{userId}
+   </select>
+
+</mapper>
