@@ -2,16 +2,13 @@
 
 ## 1. MyBatis Framework
 
+### 1) 순서
+
 1. DB 테이블 만들기
-
    * mysawon
-
 2. vo 클래스 만들기
-
    * MySawon.java
-
 3. MyBatis 설정 문서 만들기
-
    * SqlMapConfig.xml
    * 모든걸 다 연결 (와이어링)
      * dbconn.properties : 파편적인 메타정보
@@ -21,56 +18,78 @@
    * 정보가 어떤 정보냐에 따라 패키지 구분
      * resources<config
      * resources<sql
-
 4. MyBatis 라이브러리
-
    * SqlSessionFactory -> SqlSession 리턴
-
    * 쿼리문을 실행하는 Function 가짐
-
      * insert("ns.id",vo);
-
      * delete("ns.id",num);
-
      * update("ns.id",vo);
-
      * selectOne("ns.id",num);
-
      * selectList("ns.id");
 
-       
 
-![image-20211119102111465](md-images/1119/image-20211119102111465.png)
 
 ![image-20211119102225702](md-images/1119/image-20211119102225702.png)
 
 
 
-## 2. SqlSessionFactory / SqlSession
+### 2) 개념
+
+
+
+* MyBATISTestApp / JDBCTestApp 를 통한 MyBATIS Framework 의 이해
+
+  * SQL,커넥션,트랜잭선 를 메타데이타 캡술화였으며, 
+
+    :: 참조 => SqlMapConfig.xml / mybatis-userservice-mapping.xml
+
+  * JDBC철차 :  Connection => Statement => ResultSet
+
+  * resource 관리 : close
+
+  * query 수행 결과 비지니스객체(VO) 바인딩 JDBC API 를 사용하여 수행시 반복적으로 반드시 수행하는 일련의 과정을 수행함.
+
+    :: 참조 =>List<User> list = session.selectList("User.getUserList");
+
+
+
+* MyBATIS Framework 의 장점
+  * 작고 간단하다 ( mybatis-3.2.8.jar / 약 400kb / 다른 라이브러리와 의존관계 없다. )
+  * 기존 애플리케이션/테이터베이스 변경 불필요 (SQL Mapper(Data Mapper) =>SQL 과 비지니스 객체와의 바인딩)
+  * 생산성 / 성능 / 작업의 분배 (소스코드와 SQL 의 분리)
+  * 관심사의 분리 ( DBMS 에 독립적인 API제공 및 JDBC API가 아닌 비지니스 객체만 가지고 작업가능)
+
+
+
+*  MyBATIS Framework은 JDBC 절차를 간결화한 lib이다 
+  * JDBC를 절차 은익한 lib
+
+
+
+
+
+## 2. MyBatis_Sample
 
 > sp03_MyBatis ...이어서
 
 
 
-```
-					 SqlSessionFactory -> SqlSession
- 							  SqlSession
- 
- sql query												execute method
-INSERT INTO ~			------------------>			insert("namespace.id", vo);	
-DELETE FROM ~			------------------>			delete("namespace.id", pk);					
-UPDATE table ~			------------------>			update("namespace.id", vo);	
-----------------------------------------------------------------------------------------------
-SELECT * FROM			------------------>			List<T> selectlist("namespace.id");
-						------------------>			List<T> selectlist("namespace.id","서울");
-SELECT * FROM WHERE ~	------------------>			Object selectone("namespace.id",pk);
-```
+### SqlSessionFactory / SqlSession
+
+|       sql query       |               execute method               |
+| :-------------------: | :----------------------------------------: |
+|     INSERT INTO ~     |        insert("namespace.id", vo);         |
+|     DELETE FROM ~     |        delete("namespace.id", pk);         |
+|    UPDATE table ~     |        update("namespace.id", vo);         |
+|     SELECT * FROM     |    List<T> selectlist("namespace.id");     |
+|                       | List<T> selectlist("namespace.id","서울"); |
+| SELECT * FROM WHERE ~ |    Object selectone("namespace.id",pk);    |
 
 
 
 #### Command
 
-* mysawon 테이블 확인
+* `mysawon` 테이블 확인
 
 ```
 mysql> SELECT * FROM mysawon;
@@ -244,9 +263,7 @@ MySawon [num=1, age=66, id=hahash, pwd=null, name=하야시, hiredate=2021-11-18
 
 
 
-## 3.
-
-### 1) 
+## 3. MyBatis_User
 
 #### Command
 
@@ -288,6 +305,8 @@ mysql> desc users;
 ```
 
 
+
+### 1) 
 
 #### SqlMapConfig.xml
 
@@ -370,16 +389,14 @@ mysql> desc users;
 		reg_date AS regDate
 		FROM users
 	
-	</select>
-
-	
+	</select>	
 </mapper>
 ```
 
 * 해당 클래스를 resultType로 지정해주시면 그 클래스를 제네릭으로 지니는 리스트가 리턴
 * Arraylist가 아닌 그안에 들어있는 객체 - 제네릭 ???
 * parameterType부분은 인자값이랑 관련있는거여서 스트링아니면 객체일떈 user로 썼고
-* resultType부분에는 제네릭을 쓴다 이렇게 이해했는데
+* resultType부분에는 제네릭을 쓴다 이렇게 이해했는데...
 
 
 
@@ -428,29 +445,6 @@ public class MyBatisTestApp {
 		System.out.println("#####################################");
 	}// end of main
 }//end of class
-
-/*
- * ■ MyBATISTestApp / JDBCTestApp 를 통한 MyBATIS Framework 의 이해
- * ㅇ SQL,커넥션,트랜잭선 를 메타데이타 캡술화였으며, 
- *     :: 참조 => SqlMapConfig.xml / mybatis-userservice-mapping.xml
- * ㅇ JDBC철차 :  Connection => Statement => ResultSet
- *      resource 관리 : close
- *      query 수행 결과 비지니스객체(VO) 바인딩 JDBC API 를 사용하여 수행시 반복적으로 반드시
- *      수행하는 일련의 과정을 수행함.
- *      :: 참조 =>List<User> list = session.selectList("User.getUserList");
- *  
- *  ■ MyBATIS Framework 의 장점
- *  ㅇ 작고 간단하다 ( mybatis-3.2.8.jar / 약 400kb / 다른 라이브러리와 의존관계 없다. )
- *  ㅇ 기존 애플리케이션/테이터베이스 변경 불필요 
- *      (SQL Mapper(Data Mapper) =>SQL 과 비지니스 객체와의 바인딩)
- *  ㅇ 생산성 / 성능 / 작업의 분배 (소스코드와 SQL 의 분리)
- *  ㅇ 관심사의 분리 
- *       ( DBMS 에 독립적인 API제공 및 JDBC API가 아닌 비지니스 객체만 가지고 작업가능)
- *        
-  *  ■ MyBATIS Framework 은 JDBC 절차를 간결화한 lib 이다
-  *     ( JDBC를 절차 은익한 lib)        
-*/
-
 ```
 
 ```
@@ -1173,4 +1167,350 @@ mysql> SELECT * FROM users;
 ```
 
 
+
+## 4. MyBatis_Member
+
+* src/main/java
+  * spring/service/domain
+    * MemberVO.java
+* src/main/resources
+  * config
+    * dbconn.properties
+    * SqlMapConfig.xml
+  * mapper
+    * mybatis-memberservice-mapping.xml
+* src/test/java
+  * spring/service/test
+    * MyBatisMemberTestApp.java
+
+```
+mysql> SELECT * FROM member;
++-----+----------+-------+---------+
+| id  | password | name  | address |
++-----+----------+-------+---------+
+| 111 | 111      | James | NY      |
+| 222 | 222      | Jane  | Boston  |
+| 333 | 333      | Tom   | Texas   |
+| 444 | 444      | John  | Seoul   |
++-----+----------+-------+---------+
+4 rows in set (0.00 sec)
+```
+
+
+
+#### MemberVO.java
+
+```java
+package spring.service.domain;
+
+public class MemberVO {
+	private String id;
+	private String password;
+	private String name;	
+	private String address;
+	
+	public MemberVO(String id, String password, String name, String address) {
+		super();
+		this.id = id;
+		this.password = password;
+		this.name = name;
+		this.address = address;
+	}
+	
+	public MemberVO() {	}
+	public String getId() {
+		return id;
+	}
+	public void setId(String id) {
+		this.id = id;
+	}
+	public String getPassword() {
+		return password;
+	}
+	public void setPassword(String password) {
+		this.password = password;
+	}
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+	public String getAddress() {
+		return address;
+	}
+
+	public void setAddress(String address) {
+		this.address = address;
+	}
+	@Override
+	public String toString() {
+		return "MemberVO [id=" + id + ", password=" + password + ", name=" + name + ", address=" + address + "]";
+	}	
+}
+
+```
+
+
+
+#### SqlMapConfig.xml
+
+```xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+   "http://mybatis.org/dtd/mybatis-3-config.dtd">
+   
+<configuration>
+
+   <!-- 1. db정보를 가지고 온다. -->
+   <properties resource="config/dbconn.properties"/>
+   
+   <!-- 2. vo를 alias.... -->
+   <typeAliases>
+      <typeAlias type="spring.service.domain.MemberVO" alias="memberVO"/>
+   </typeAliases>
+   
+   <!-- 3. jdbc 환경 구축 -->
+   <environments default="mulcam">
+      <environment id="mulcam" >
+         <transactionManager type="JDBC"/>
+         <dataSource type="UNPOOLED">
+            <property name="driver" value="${jdbc.mysql.driver}"/>
+            <property name="url" value="${jdbc.mysql.url}"/>
+            <property name="username" value="${jdbc.mysql.username}"/>
+            <property name="password" value="${jdbc.mysql.password}"/>
+         
+         </dataSource>
+      </environment>
+   </environments>
+   
+   <!--4. sql mapper -->
+   <mappers>
+      <mapper resource="mapper/mybatis-memberservice-mapping.xml"/>
+   </mappers>
+   
+</configuration>
+```
+
+
+
+####  mybatis-memberservice-mapping.xml
+
+```xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="MemberMapper">
+
+<!-- Object obj = session.insert("MemberMapper.registerMember", memberVO); -->
+	<insert id="registerMember" parameterType="memberVO">
+		INSERT INTO
+		member (id, password, name, address)
+		VALUES (#{id},#{password},#{name},#{address})
+	</insert>
+	
+<!-- int deleteResult = session.delete("MemberMapper.deleteMember", memberVO.getId()); -->
+	<delete id="deleteMember" parameterType="memberVO">
+		DELETE FROM
+		member
+		WHERE id = #{id}
+	</delete>
+	
+<!-- int updateResult = session.update("MemberMapper.updateMember", memberVO); -->	
+	<update id="updateMember" parameterType="memberVO">
+		UPDATE
+		member
+		SET name = #{name}, address = #{address}
+		WHERE id = #{id}
+	</update>
+
+<!-- String name = (String)session.selectOne("MemberMapper.getMember", memberVO); -->	
+	<select id="getMember" parameterType="memberVO" resultType="string">
+		SELECT 
+		name
+		FROM member
+		WHERE id = #{id}
+<!-- 	WHERE id LIKE #{id} -->
+	
+	</select>
+
+<!-- list = session.selectList("MemberMapper.showAllMember"); -->	
+	<select id="showAllMember" parameterType="memberVO" resultType="memberVO">
+		SELECT 
+		id, password, name, address
+		FROM member
+	</select>
+</mapper>
+```
+
+
+
+
+
+#### MyBatisMemberTestApp
+
+````java
+package spring.service.test;
+
+import spring.service.domain.MemberVO;
+
+import java.io.Reader;
+import java.util.List;
+
+import org.apache.ibatis.io.Resources;
+import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.apache.ibatis.session.SqlSessionFactoryBuilder;
+
+/**
+ * FileName : MyBatisMemberTestApp.java
+  * ㅇ SqlMapConfig.xml / mybatis-memberservice-mapping.xml
+  * ㅇ My Framework 이용 QUERY ( SELECT ) TEST 
+  */
+
+public class MyBatisMemberTestApp {
+	///Main method
+	public static void main(String[] args) throws Exception{
+		
+		//==> SqlMapConfig.xml : MyBATIS Framework 의 핵심 환경설정화일 (MetaData)
+		//==> mybatis-Memberservice-mapping.xml : SQL 를 갖는 설정화일 (MetaData) 
+		
+		//==> 1. xml metadata 읽는 Stream 생성
+		Reader reader=Resources.getResourceAsReader("config/SqlMapConfig.xml");
+		
+		//==> 2. Reader 객체를 이용 xml metadata 에 설정된 각정 정보를 접근, 사용가능한 
+		//==>    SqlSession  객체 생성
+		SqlSessionFactory factory=new SqlSessionFactoryBuilder().build(reader);
+		SqlSession session=factory.openSession();
+		
+		//0.showAllMember
+		System.out.println(":: 0. showAllMember(SELECT)  ? ");
+		List<MemberVO> list = session.selectList("MemberMapper.showAllMember");						
+		for (int i =0 ;  i < list.size() ; i++) {
+			System.out.println( "<"+ ( i +1 )+"> 번째 회원.."+ list.get(i).toString() );
+		}
+		System.out.println("\n");
+		
+		
+		//==> Test용 MembermemberVO instance 생성
+		//MembermemberVO(String id, String password, String name, String address)
+		MemberVO memberVO = new MemberVO("555","555","Kate","LA");
+		
+		//1.registerMember
+		Object obj = session.insert("MemberMapper.registerMember", memberVO);
+		session.commit(); //이 부분 반드시 해줘야 한다....mvc에서는 생략가능.
+		//iBatis와 다르게 insert문의 리턴타입은 insert된 row수를 반환한다.
+		System.out.println(":: 1. registerMember(INSERT)  result ? "+obj); 						
+		System.out.println("\n");
+		
+		
+		//2.getMember
+		String name = (String)session.selectOne("MemberMapper.getMember", memberVO);		
+		System.out.println(":: 2. getMember(SELECT)  ? "+name); 						
+		System.out.println("\n");
+			
+		
+		//3.updateMember
+		memberVO.setName("Sally");
+		int updateResult = session.update("MemberMapper.updateMember", memberVO);
+		session.commit(); //이부분 반드시 해줘야 한다.
+		System.out.println(":: 3. updateMember(UPDATE) result ? "+updateResult);			
+		System.out.println("\n");
+		
+			
+		//4.getMember
+		name = (String)session.selectOne("MemberMapper.getMember", memberVO);
+		System.out.println(":: 4. getMember(SELECT)  ? "+name); 						
+		System.out.println("\n");
+		
+		
+		//5.deleteMember
+		int deleteResult = session.delete("MemberMapper.deleteMember", memberVO.getId());
+		session.commit(); //이 부분 반드시 해줘야 한다.
+		System.out.println(":: 5. deleteMember(DELETE) result ? "+deleteResult);
+		System.out.println("\n");
+		
+		
+		//6.showAllMember 
+		System.out.println(":: 6. showAllMember(SELECT)  ? ");
+		list = session.selectList("MemberMapper.showAllMember");
+		for (int i =0 ;  i < list.size() ; i++) {
+			System.out.println( "<"+ ( i +1 )+"> 번째 회원.."+ list.get(i).toString() );
+		}
+		
+	}//end of main
+}//end of class
+````
+
+```
+:: 0. showAllMember(SELECT)  ? 
+<1> 번째 회원..MemberVO [id=111, password=111, name=James, address=NY]
+<2> 번째 회원..MemberVO [id=222, password=222, name=Jane, address=Boston]
+<3> 번째 회원..MemberVO [id=333, password=333, name=Tom, address=Texas]
+<4> 번째 회원..MemberVO [id=444, password=444, name=John, address=Seoul]
+
+
+:: 1. registerMember(INSERT)  result ? 1
+
+
+:: 2. getMember(SELECT)  ? Kate
+
+
+:: 3. updateMember(UPDATE) result ? 1
+
+
+:: 4. getMember(SELECT)  ? Sally
+
+
+:: 5. deleteMember(DELETE) result ? 1
+
+
+:: 6. showAllMember(SELECT)  ? 
+<1> 번째 회원..MemberVO [id=111, password=111, name=James, address=NY]
+<2> 번째 회원..MemberVO [id=222, password=222, name=Jane, address=Boston]
+<3> 번째 회원..MemberVO [id=333, password=333, name=Tom, address=Texas]
+<4> 번째 회원..MemberVO [id=444, password=444, name=John, address=Seoul]
+```
+
+```
+mysql> SELECT * FROM member;
++-----+----------+-------+---------+
+| id  | password | name  | address |
++-----+----------+-------+---------+
+| 111 | 111      | James | NY      |
+| 222 | 222      | Jane  | Boston  |
+| 333 | 333      | Tom   | Texas   |
+| 444 | 444      | John  | Seoul   |
+| 555 | 555      | Kate  | LA      |
++-----+----------+-------+---------+
+5 rows in set (0.00 sec)
+```
+
+```
+mysql> SELECT * FROM member;
++-----+----------+-------+---------+
+| id  | password | name  | address |
++-----+----------+-------+---------+
+| 111 | 111      | James | NY      |
+| 222 | 222      | Jane  | Boston  |
+| 333 | 333      | Tom   | Texas   |
+| 444 | 444      | John  | Seoul   |
+| 555 | 555      | Sally | LA      |
++-----+----------+-------+---------+
+5 rows in set (0.00 sec)
+```
+
+```
+mysql> SELECT * FROM member;
++-----+----------+-------+---------+
+| id  | password | name  | address |
++-----+----------+-------+---------+
+| 111 | 111      | James | NY      |
+| 222 | 222      | Jane  | Boston  |
+| 333 | 333      | Tom   | Texas   |
+| 444 | 444      | John  | Seoul   |
++-----+----------+-------+---------+
+4 rows in set (0.00 sec)
+```
 
