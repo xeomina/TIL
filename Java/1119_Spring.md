@@ -292,32 +292,36 @@ mysql> desc users;
 ```xml
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
-	"http://mybatis.org/dtd/mybatis-3-config.dtd">
+   "http://mybatis.org/dtd/mybatis-3-config.dtd">
 <configuration>
-<!-- 1.db정보 가지고 온다 -->
-<properties resource="config/dbconn.properties"/>
-<!-- 2.vo alias 지정 -->
-<typeAliases>
-	<typeAlias type="ibatis.services.domain.User" alias="user"/>
-</typeAliases>
-<!-- 3.jdbc 환경구축 -->
-<environments default="mulcam">
-	<environment id="mulcam">
-		<transactionManager type="JDBC"/>
-		<dataSource type="UNPOOLED">
-			<property name="driver" value="${jdbc.mysql.driver}"/>
-			<property name="url" value="${jdbc.mysql.url}"/>
-			<property name="username" value="${jdbc.mysql.username}"/>
-			<property name="password" value="${jdbc.mysql.password}"/>
-		</dataSource>
-	</environment>
-</environments>
-
-<!-- 4.sql mapper -->
-<mappers>
-	<mapper resource="sql/mybatis-userservice-mapping.xml"/>	
-</mappers>
-	
+   <!-- 1. db정보를 가지고 온다. -->
+   <properties resource="config/dbconn.properties"/>
+   
+   
+   <!-- 2. vo를 alias.... -->
+   <typeAliases>
+      <typeAlias type="ibatis.services.domain.User" alias="user"/>
+   </typeAliases>
+   
+   
+   <!-- 3. jdbc 환경 구축 -->
+   <environments default="mulcam">
+      <environment id="mulcam" >
+         <transactionManager type="JDBC"/>
+         <dataSource type="UNPOOLED">
+            <property name="driver" value="${jdbc.mysql.driver}"/>
+            <property name="url" value="${jdbc.mysql.url}"/>
+            <property name="username" value="${jdbc.mysql.username}"/>
+            <property name="password" value="${jdbc.mysql.password}"/>
+         
+         </dataSource>
+      </environment>
+   </environments>
+    
+   <!--4. sql mapper -->
+   <mappers>
+      <mapper resource="sql/mybatis-userservice-mapping.xml"/>
+   </mappers>
 </configuration>
 ```
 
@@ -373,6 +377,7 @@ mysql> desc users;
 ```
 
 * 해당 클래스를 resultType로 지정해주시면 그 클래스를 제네릭으로 지니는 리스트가 리턴
+* Arraylist가 아닌 그안에 들어있는 객체 - 제네릭 ???
 
 
 
@@ -495,6 +500,7 @@ User [userid=user03, userName=김유신, password=user03, age=30, grade=3, activ
          </dataSource>
       </environment>
    </environments>
+    
    <!--4. sql mapper -->
    <mappers>
       <mapper resource="sql/mybatis-userservice-mapping.xml"/>
@@ -652,13 +658,11 @@ public class MyBatisTestApp01 {
 <configuration>
    <!-- 1. db정보를 가지고 온다. -->
    <properties resource="config/dbconn.properties"/>
-   
-   
+      
    <!-- 2. vo를 alias.... -->
    <typeAliases>
       <typeAlias type="ibatis.services.domain.User" alias="user"/>
-   </typeAliases>
-   
+   </typeAliases> 
    
    <!-- 3. jdbc 환경 구축 -->
    <environments default="mulcam">
@@ -673,6 +677,7 @@ public class MyBatisTestApp01 {
          </dataSource>
       </environment>
    </environments>
+    
    <!--4. sql mapper -->
    <mappers>
       <mapper resource="sql/mybatis-userservice-mapping.xml"/>
@@ -919,4 +924,48 @@ public class 	MyBatisTestApp02 {
 
 
 
-## 4.
+### 4)
+
+#### SqlMapConfig.xml
+
+* `mapping03.xml` 추가
+
+```xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+   "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+   <!-- 1. db정보를 가지고 온다. -->
+   <properties resource="config/dbconn.properties"/>
+   
+   <!-- 2. vo를 alias.... -->
+   <typeAliases>
+      <typeAlias type="ibatis.services.domain.User" alias="user"/>
+   </typeAliases>
+   
+   <!-- 3. jdbc 환경 구축 -->
+   <environments default="mulcam">
+      <environment id="mulcam" >
+         <transactionManager type="JDBC"/>
+         <dataSource type="UNPOOLED">
+            <property name="driver" value="${jdbc.mysql.driver}"/>
+            <property name="url" value="${jdbc.mysql.url}"/>
+            <property name="username" value="${jdbc.mysql.username}"/>
+            <property name="password" value="${jdbc.mysql.password}"/>
+         
+         </dataSource>
+      </environment>
+   </environments>
+    
+   <!--4. sql mapper -->
+   <mappers>
+      <mapper resource="sql/mybatis-userservice-mapping.xml"/>
+      <mapper resource="sql/mybatis-userservice-mapping01.xml"/>
+      <mapper resource="sql/mybatis-userservice-mapping02.xml"/>
+      <mapper resource="sql/mybatis-userservice-mapping03.xml"/>
+   </mappers>
+</configuration>
+```
+
+
+
