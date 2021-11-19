@@ -55,7 +55,7 @@ di는 컴포넌트 기반
 			//코드에서 new를 사용하지 않는 방법은, 즉 객체 생성을 직접 하지 않는 방법은
 			//자바 클래스를(컴포넌트를) 생성하는 컨테이너를 사용하는 것이다.
 			//이것이 바로 DI이다.
-			
+
 DI 컨테이너 = 코어 컨테이너
 
 
@@ -511,8 +511,10 @@ Query OK, 0 rows affected (0.04 sec)
 ```
 
 1. DB table 생성
+   1. Command로 mysawon 테이블 생성
 
 2. VO 생성
+   1.  `MySawon.java`
 3. SqlMapConfig.xml 생성
 
 ![image-20211118153614753](md-images/1118/image-20211118153614753.png)
@@ -557,6 +559,112 @@ Query OK, 0 rows affected (0.04 sec)
 	</environment> 								
  </environments>
  
+  <!-- 4.SQL쿼리문 Mapper -->
+ <mappers>
+ 	<mapper resource="sql/mysawon_mapping.xml"/>
+ </mappers>
  </configuration>
+```
+
+sql / xml 기반으로 바꿔서 만드는 방법
+
+결론
+
+DB 서버 정보도 vo 객체 정보도 sql 쿼리문도 와이어링///
+
+마이바티스 프레임 워크에서는 SqlMapConfig.xml만 읽어들이면 됨 - 누가? DAOImpl
+
+다 가지고 있음
+
+![image-20211118162301658](md-images/1118/image-20211118162301658.png)
+
+
+
+#### mysawon_mapping.xml
+
+```xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="sawonMapper">
+	<insert id="sawonAdd" parameterType="mySawon"> <!-- mySawon: vo alias -->
+		INSERT
+		INTO mysawon (id,pwd,name,age,hiredate) <!-- num은 알아서 생성 - 절대 넣지 x -->
+<!-- 폼으로부터 받은 값 -> VO 생성 - 비즈니스 로직에 인자값 -> 뽑아서 집어넣기
+	-> VO에서 뽑을때 get -> MyBatis에서 getter는 #{} :: VALUE(#{id}) = mysawon.getId !! -->
+		VALUE(#{id},#{pwd},#{name},#{age},curDate()) <!-- curDate() 자동으로 현재날짜 불러오는 함수 -->
+		
+	</insert>
+</mapper>
+```
+
+
+
+```java
+package com.edu.mybatis.test;
+
+import java.io.Reader;
+
+import org.apache.ibatis.io.Resources;
+import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.apache.ibatis.session.SqlSessionFactoryBuilder;
+
+import com.edu.mybatis.vo.MySawon;
+
+/*
+ * MyBatis 프레임워크의 가장 핵심이 되는 설정 문서를 생성함
+ * SqlMapConfig.xml
+ * 
+ * 이제 MyBatis 프레임워크에서 제공하는 라이브러리 클래스를 이용해서
+ * SqlMapConfig.xml을 읽어들이고 
+ * 쿼리문을 동작시킬 것
+ */
+
+public class MySawonTestApp01 {
+
+	public static void main(String[] args) throws Exception{
+		//1.화면의 폼을 통해서 vo를 생성한다는 가정으로...
+		MySawon vo = new MySawon();
+//		vo.setId("hahash");
+//		vo.setPwd("1234");
+//		vo.setName("하야시");
+//		vo.setAge(66);
+		
+		vo.setId("dorosh");	//unique 때문에 바꿔줘야 함 
+		vo.setPwd("1234");
+		vo.setName("도로시");
+		vo.setAge(22);
+		
+		//2.핵심이 되는 설정 문서를 읽어들인다.
+		Reader r = Resources.getResourceAsReader("config/SqlMapConfig.xml");	//ibatis: mybatis의 이전 버전
+		
+		//3.MyBatis 라이브러리...순서는 천천히 외우면 된다...
+		SqlSessionFactory factory = new SqlSessionFactoryBuilder().build(r);	//SqlSessionFactory 생성
+		
+		//Session 여기에 쿼리문 실행하는 기능이 다 들어있다...
+		SqlSession session = factory.openSession();
+		
+		session.insert("sawonMapper.sawonAdd",vo); //vo: parameterType ??
+		session.commit(); //mybatis만 돌릴때
+		session.close();
+		
+		System.out.println(vo.getName()+"님 회원등록 성공 !!");
+
+	}
+}
+```
+
+```
+mysql> SELECT * FROM mysawon;
++-----+--------+------+--------+------+------------+
+| num | id     | pwd  | name   | age  | hiredate   |
++-----+--------+------+--------+------+------------+
+|   1 | hahash | 1234 | 하야시 |   66 | 2021-11-18 |
+|   2 | dorosh | 1234 | 도로시 |   22 | 2021-11-18 |
++-----+--------+------+--------+------+------------+
+2 rows in set (0.00 sec)
 ```
 
