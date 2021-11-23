@@ -65,11 +65,9 @@ maven은 일일이 안 넣어줘도 dependency가 라이브러리 하나
 Presentation Layer
 
 * Dispatcher Servlet : 클라이언트의 모든 요청은 하나의 서블릿이 다 받는다
-* ControllerFactory -> HandlerMapping으로 !
+* ControllerFactory (HandlerMapping)
   * 컨트롤러 생성
-* Controller : 
-  * 인터페이스 기반 컴포넌트
-  * 
+* Controller : 인터페이스 기반 컴포넌트
 * 만든애의 부모타입 리턴 - Controller 
 * Dispatcher는 Controller의 메소드 call
   * handle(re);
@@ -277,3 +275,141 @@ DI Contatiner가 `servlet-context`을 읽고 bean 생성
 
 * 주문서대로 bean 생성해주는 것은 DI Contatiner
 
+
+
+#### index.jsp
+
+```jsp
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+	<h2 align="center">======== Spring MVC Framework Module ========</h2>
+	<!-- main.do라는 요청을  DispatcherServlet 받아서...
+		  그걸 HandlerMapping(ControllerFactory)한테 줄 것 
+		  그럼 HandlerMapping 그 요청에 해당하는 컴포넌트를 생성...
+		 MainController를 우리는 직접 작성해놓으면 된다 
+		 
+		 index 페이지 다음에 Controller기반의 Component 작성을 하면 된다 -->
+	<center><a href="main.do">DispatcherServlet Moving</a></center>
+</body>
+</html>
+```
+
+
+
+#### MainController.java
+
+```java
+package com.edu.spring.controller;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.Controller;
+
+public class MainController implements Controller{
+
+	@Override
+	public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		ModelAndView mv = new ModelAndView();
+		mv.setViewName("result");	//결과 페이지의 이름
+		mv.addObject("info","MainController...execute !!");
+		
+		//자동적으로 forward 방식으로 이동, ServletRequest에 바인딩이 이뤄진다
+		return mv;
+	}
+
+}
+```
+
+
+
+#### result.jsp
+
+```jsp
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+<h3>${info}</h3>
+</body>
+</html>
+```
+
+
+
+#### web.xml
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="2.5" xmlns="http://java.sun.com/xml/ns/javaee"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee https://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
+
+	<!-- Processes application requests -->
+	<servlet>
+		<servlet-name>dispatcher</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+		
+	<servlet-mapping>
+		<servlet-name>dispatcher</servlet-name>
+		<url-pattern>*.do</url-pattern>
+	</servlet-mapping>
+
+</web-app>
+```
+
+WAS 가동되면서 무조건 읽는 문서... web.xml이 하는 일
+
+* 서블릿 생성
+  * `org.springframework.web.servlet.DispatcherServlet`
+* Bean 설정 문서 Wiring
+  * 별도로 와이어링 하는 문서가 없을때... 디폴트로 와이어링하는 문서 
+  * = `서블릿이름-servlet.xml`
+    * ex) 여기서는 서블릿 이름이 dispatcher...
+    * dispatcher-servlet.xml 이라는 bean 설정 문서 무조건 찾는다 !!!
+
+#### dispatcher-servlet.xml
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd">
+
+
+	<!-- Bean 등록...일종의 주문서...이 주문서를 BeanContainer가 읽어서 빈을 생성한다 -->
+	
+	<!-- 결과 페이지의 위치와 확장자 정보를 가지고 있는 API bean :: InternalResourceViewResolver -->
+	<bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="/WEB-INF/results/" /> <!-- 결과 페이지의 물리적인 저장 위치 -->
+		<property name="suffix" value=".jsp" /> <!-- 결과 페이지의 확장자 -->
+	</bean>
+	
+	<!-- 사용자 정의 Bean 등록 name 속성값으로는 어떤 요청이 들어왔을 때 ControllerFactory가 생성해주는 Component인지를 등록 -->
+	<bean name="/main.do" class="com.edu.spring.controller.MainController"></bean>	
+	
+</beans>
+```
+
+
+
+
+
+![image-20211123164432049](md-images/1123/image-20211123164432049.png)
+
+![image-20211123164439800](md-images/1123/image-20211123164439800.png)
