@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+   "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+
+   <!-- 1. db정보를 가지고 온다. -->
+   <properties resource="config/dbconn.properties"/>
+   
+   <!-- Snake Case를 일반적으로 사용되는 Camel Case로 자동치환되어 인식이 가능 -->
+   <settings>
+   		<setting name="mapUnderscoreToCamelCase" value="true"/>
+   </settings>
+   
+   <!-- 2. vo를 alias.... -->
+   <typeAliases>
+      <package name="com.edu.spring.domain"/> <!-- 자동으로 alias : myProduct -->
+   </typeAliases>
+   
+   <!-- 3. jdbc 환경 구축 -->
+   <!-- 단위 테스트용...MyBatisFramework를 위한...DI와 연결하기 전의... -->
+   <environments default="mulcam">
+      <environment id="mulcam" >
+         <transactionManager type="JDBC"/>
+         <dataSource type="UNPOOLED"> <!-- 단위 테스트할 때는  UNPOOLED -->
+            <property name="driver" value="${jdbc.mysql.driver}"/>
+            <property name="url" value="${jdbc.mysql.url}"/>
+            <property name="username" value="${jdbc.mysql.username}"/>
+            <property name="password" value="${jdbc.mysql.password}"/>
+         
+         </dataSource>
+      </environment>
+   </environments>
+   
+   <!--4. sql mapper -->
+   <mappers>
+      <mapper resource="sql/mybatis-myproduct-mapping.xml"/>
+   </mappers>
+   
+</configuration>
