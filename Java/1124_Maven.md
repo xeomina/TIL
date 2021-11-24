@@ -439,6 +439,13 @@ public class MyProduct {
 		this.maker = maker;
 		this.price = price;
 	}
+	
+	//생성자 오버로딩
+	public MyProduct(String name, String maker, int price) {
+		this.name = name;
+		this.maker = maker;
+		this.price = price;
+	}
 
 	//setter / getter
 	public int getId() {
@@ -477,9 +484,265 @@ public class MyProduct {
 	@Override
 	public String toString() {
 		return "MyProduct [id=" + id + ", name=" + name + ", maker=" + maker + ", price=" + price + "]";
-	}
+	}	
 }
 ```
 
 
+
+#### SqlMapConfig.xml
+
+```xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+   "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+
+   <!-- 1. db정보를 가지고 온다. -->
+   <properties resource="config/dbconn.properties"/>
+   
+   <!-- Snake Case를 일반적으로 사용되는 Camel Case로 자동치환되어 인식이 가능 -->
+   <settings>
+   		<setting name="mapUnderscoreToCamelCase" value="true"/>
+   </settings>
+   
+   <!-- 2. vo를 alias.... -->
+   <typeAliases>
+      <package name="com.edu.spring.domain"/> <!-- 자동으로 alias : myProduct -->
+   </typeAliases>
+   
+   <!-- 3. jdbc 환경 구축 -->
+   <!-- 단위 테스트용...MyBatisFramework를 위한...DI와 연결하기 전의... -->
+   <environments default="mulcam">
+      <environment id="mulcam" >
+         <transactionManager type="JDBC"/>
+         <dataSource type="UNPOOLED"> <!-- 단위 테스트할 때는  UNPOOLED -->
+            <property name="driver" value="${jdbc.mysql.driver}"/>
+            <property name="url" value="${jdbc.mysql.url}"/>
+            <property name="username" value="${jdbc.mysql.username}"/>
+            <property name="password" value="${jdbc.mysql.password}"/>
+         
+         </dataSource>
+      </environment>
+   </environments>
+   
+   <!--4. sql mapper -->
+   <mappers>
+      <mapper resource="sql/mybatis-myproduct-mapping.xml"/>
+   </mappers>
+   
+</configuration>
+```
+
+
+
+#### mybatis-myproduct-mapping.xml
+
+```XML
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 
+	1) 상품 등록
+	2) 등록된 모든 상품 정보를 검색
+	3) 특정한 상품명이 들어가는 제품 검색
+	   like %, _
+	4) 제조사별 검색
+	   like %, _
+	5) 제품 정보 수정
+	
+	 -->
+<mapper namespace="ns.sql.MyProductMapper">
+
+	<!-- 상품 등록 -->
+	<insert id="addProduct" parameterType="myproduct">
+		INSERT INTO 
+		myproduct (name, maker, price) 
+		VALUES (#{name}, #{maker}, #{price})
+		
+	</insert>
+	
+	<!-- SELECT문 -->
+	<sql id ="select-myproduct">
+		SELECT id, name, maker, price
+		FROM myproduct
+	</sql>
+	
+	<!-- 등록된 모든 상품 정보를 검색 -->
+	<select id="findProducts" resultType="myProduct" parameterType="string">
+		<include refid="select-myproduct"/>
+	</select>
+	
+	<!-- 특정한 상품명이 들어가는 제품 검색 -->
+	<select id="findProductByName" resultType="myProduct" parameterType="string">
+		<include refid="select-myproduct"/>
+			WHERE name LIKE '%' #{VALUE} '%'
+			<!-- WHERE name LIKE '%${VALUE}%' -->
+	</select>
+	
+	<!-- 제조사별 검색 -->
+	<select id="findProductByMaker" resultType="myProduct" parameterType="string">
+		<include refid="select-myproduct"/>
+			WHERE name LIKE #{VALUE}
+	</select>
+	
+	<!-- 제품 정보 수정 -->
+	<update id="updateProduct" parameterType="myproduct">
+		UPDATE myproduct
+		SET name=#{name}, maker=#{maker}, price=#{price}
+		WHERE ID=#{id}
+	</update>
+</mapper>
+```
+
+
+
+#### Maven Repository에서 dependency 받아오기
+
+* https://mvnrepository.com/search?q=mybatis
+
+![image-20211124143612712](md-images/1124/image-20211124143612712.png)
+
+
+
+[MyBatis 3.4.6](https://mvnrepository.com/artifact/org.mybatis/mybatis/3.4.6)
+
+```
+<!-- https://mvnrepository.com/artifact/org.mybatis/mybatis -->
+<dependency>
+    <groupId>org.mybatis</groupId>
+    <artifactId>mybatis</artifactId>
+    <version>3.4.6</version>
+</dependency>
+```
+
+ [MyBatis Spring 1.3.2](https://mvnrepository.com/artifact/org.mybatis/mybatis-spring/1.3.2)
+
+```
+<!-- https://mvnrepository.com/artifact/org.mybatis/mybatis-spring -->
+<dependency>
+    <groupId>org.mybatis</groupId>
+    <artifactId>mybatis-spring</artifactId>
+    <version>1.3.2</version>
+</dependency>
+```
+
+나머지도... 시간상 skip !
+
+
+
+#### pom.xml
+
+* dependency 추가
+
+```xml
+		<!-- 1. mybatis -->
+		<dependency>
+		    <groupId>org.mybatis</groupId>
+		    <artifactId>mybatis</artifactId>
+		    <version>3.4.6</version>
+		</dependency>
+		
+		<!-- 2. mybatis-spring -->
+		<dependency>
+		    <groupId>org.mybatis</groupId>
+		    <artifactId>mybatis-spring</artifactId>
+		    <version>1.3.2</version>
+		</dependency>
+		
+		<!-- 3. spring-jdbc -->
+		<dependency>
+		    <groupId>org.springframework</groupId>
+		    <artifactId>spring-jdbc</artifactId>
+		    <version>5.1.3.RELEASE</version>
+		</dependency>
+		
+		<!-- 4. spring-tx -->
+		<dependency>
+		    <groupId>org.springframework</groupId>
+		    <artifactId>spring-tx</artifactId>
+		    <version>5.1.3.RELEASE</version>
+		</dependency>
+		
+		<!-- 5. commons-dbcp -->
+		<dependency>
+		    <groupId>commons-dbcp</groupId>
+		    <artifactId>commons-dbcp</artifactId>
+		    <version>1.4</version>
+		</dependency>
+		
+		<!-- 6. commons-pool2 -->
+		<dependency>
+		    <groupId>org.apache.commons</groupId>
+		    <artifactId>commons-pool2</artifactId>
+		    <version>2.6.0</version>
+		</dependency>
+		
+		<!-- 7. mysql-connector-java -->
+		<dependency>
+		    <groupId>mysql</groupId>
+		    <artifactId>mysql-connector-java</artifactId>
+		    <version>8.0.15</version>
+		</dependency>
+```
+
+![image-20211124144135678](md-images/1124/image-20211124144135678.png)
+
+![image-20211124144211808](md-images/1124/image-20211124144211808.png)
+
+
+
+#### MyBatisUnitTestApp.java
+
+```java
+package com.edu.spring.test;
+
+import java.io.Reader;
+import java.util.List;
+
+import org.apache.ibatis.io.Resources;
+import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.apache.ibatis.session.SqlSessionFactoryBuilder;
+
+import com.edu.spring.domain.MyProduct;
+
+public class MyBatisUnitTestApp {
+	public static void main(String[] args) throws Exception{
+		Reader r=Resources.getResourceAsReader("config/SqlMapConfig.xml");
+		SqlSessionFactory factory = new SqlSessionFactoryBuilder().build(r);
+		
+		SqlSession session = factory.openSession();
+		
+		System.out.println("============== 1. addProduct =====================");
+		MyProduct vo = new MyProduct("초코파이","오리온",1000);
+		int result = session.insert("ns.sql.MyProductMapper.addProduct", vo);	//namespace.id
+		session.commit(); //단위테스트...commit 반드시!
+		System.out.println(result+"개의 상품이 추가되었습니다.");
+		 
+		
+		System.out.println("============== 2. findProducts =====================");
+		List<MyProduct> list = session.selectList("ns.sql.MyProductMapper.findProducts");
+		for(MyProduct pro : list) System.out.println(pro);
+      
+		System.out.println("============== 3. findProductByName =====================");
+		List<MyProduct> list2 = session.selectList("ns.sql.MyProductMapper.findProductByName","세탁기");
+     	for(MyProduct pro : list2) System.out.println(pro);
+		
+	}
+}
+```
+
+```
+============== 1. addProduct =====================
+1개의 상품이 추가되었습니다.
+============== 2. findProducts =====================
+MyProduct [id=1, name=통돌이 세탁기, maker=대우, price=450000]
+MyProduct [id=2, name=드럼울세탁 세탁기, maker=대우, price=550000]
+MyProduct [id=3, name=초코파이, maker=오리온, price=1000]
+============== 3. findProductByName =====================
+MyProduct [id=1, name=통돌이 세탁기, maker=대우, price=450000]
+MyProduct [id=2, name=드럼울세탁 세탁기, maker=대우, price=550000]
+```
 
