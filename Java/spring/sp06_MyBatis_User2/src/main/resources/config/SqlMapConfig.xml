@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	<!-- 1. db정보를 가지고 온다. -->
+	<properties resource="config/dbconn.properties"/>
+	<!-- 
+		Oracle 벤더인 경우, 
+		null값을 입력해야하는 경우에는, 반드시 옵션을 추가해줘야한다...추가 안하면 jdbcTypeForNull~~에러 발생.
+		settings 옵션의 위치가 중요한데,
+		properties 태그 바로 다음에 반드시 지정해야한다.
+		
+		MySQL 벤더인 경우,
+		null값 허용하도록 기본세팅이 잡혀 있기 때문에
+		옵션을 주지 않아도 된다.
+		
+	 -->
+	<settings>
+<!-- 		<setting name="jdbcTypeForNull" value="NULL"/> -->
+		<setting name="mapUnderscoreToCamelCase" value="True"/>
+		<!-- 알아서 소문자로 꼬꾸라짐.! -->
+	</settings>
+	<!-- 2. vo를 alias.... -->
+	<typeAliases>
+		<package name="ibatis.services.domain"/><!-- user,MyProduct -->
+		
+		
+	</typeAliases>
+	
+	
+	<!-- 3. jdbc 환경 구축 -->
+	<environments default="mulcam">
+		<environment id="mulcam" >
+			<transactionManager type="JDBC"/>
+			<dataSource type="UNPOOLED">
+				<property name="driver" value="${jdbc.mysql.driver}"/>
+				<property name="url" value="${jdbc.mysql.url}"/>
+				<property name="username" value="${jdbc.mysql.username}"/>
+				<property name="password" value="${jdbc.mysql.password}"/>
+			
+			</dataSource>
+		</environment>
+	</environments>
+	<!-- sql mapper -->
+	<mappers>
+		<mapper resource="sql/mybatis-userservice-mapping.xml"/>
+ 		<mapper resource="sql/mybatis-userservice-mapping01.xml"/>
+		<mapper resource="sql/mybatis-userservice-mapping02.xml"/>
+		<mapper resource="sql/mybatis-userservice-mapping03.xml"/>
+		<mapper resource="sql/mybatis-userservice-mapping05.xml"/>
+		<mapper resource="sql/mybatis-userservice-mapping07.xml"/>
+		<mapper resource="sql/mybatis-userservice-mapping08.xml"/>
+		<mapper resource="sql/mybatis-userservice-mapping10.xml"/>
+	</mappers>
+</configuration>

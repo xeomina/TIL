@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+
+<!-- MyBatisFramework와 DI를 연결하는 설정문서... -->
+
+	<settings>
+		<setting name="mapUnderscoreToCamelCase" value="True"/>
+	</settings>
+	
+	<!-- 2. vo를 alias.... -->
+	<typeAliases>
+		<package name="ibatis.services.domain"/>
+	</typeAliases>
+	
+	<!-- 3. sql mapper -->
+	<mappers>
+		<mapper resource="sql/mybatis-userservice-mapping10.xml"/>
+	</mappers>
+	
+</configuration>
