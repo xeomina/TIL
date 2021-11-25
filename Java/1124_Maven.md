@@ -586,7 +586,7 @@ public class MyProduct {
 	<!-- 제조사별 검색 -->
 	<select id="findProductByMaker" resultType="myProduct" parameterType="string">
 		<include refid="select-myproduct"/>
-			WHERE name LIKE #{VALUE}
+			WHERE maker LIKE #{VALUE}
 	</select>
 	
 	<!-- 제품 정보 수정 -->
@@ -1254,7 +1254,7 @@ id는 DB Table에서 만들어짐 - 하나의 로우 인스턴스화 시킨 것�
 	<!-- 제조사별 검색 -->
 	<select id="findProductByMaker" resultType="myProduct" parameterType="string">
 		<include refid="select-myproduct"/>
-			WHERE name LIKE #{VALUE}
+			WHERE maker LIKE #{VALUE}
 	</select>
 	
 	<!-- 제품 정보 수정 -->
