@@ -1231,23 +1231,133 @@ public class ItemController {
 
 
 
+### 상세 페이지로 이동
+
+
+
+#### itemList.jsp
+
+```jsp
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+<h1 align="center">Fruit Total List I. </h1>
+<table align="center" border="2">
+	<tr>
+		<c:forEach items="${list}" var="item">
+			<td>
+				<a href="itemView.do?itemnumber=${item.itemNumber}">	<!-- get방식으로 -->
+					<img alt="" src="${item.url}" width="150" height="150"></a><br>
+				상품명 : ${item.name}<br>
+				가  격 : ${item.price}
+			</td>
+		</c:forEach>
+	</tr>
+
+</table>
+</body>
+</html>
+```
+
+
+
+#### itemView.jsp
+
+```jsp
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<style type="text/css">
+	#first{ background-color: threedlightshadow;}
+	*{ color:  navy;}
+</style>
+</head>
+<body>
+<h1 align="center"><b>${item.name}</b></h1>
+<table align="center" width="600" id="first">
+	<tr>	
+		<td align="center">
+			조회수 : ${item.count} &nbsp;&nbsp; &nbsp;&nbsp;<button>장바구니 담기</button>&nbsp;&nbsp;<button>장바구니 확인</button>
+		</td>
+	</tr>
+</table>
+
+<table align="center" width="600">
+	<tr>	
+		<td rowspan="3">
+			<img alt="" src="${item.url}">
+		</td>
+		<td>종 류 : ${item.name}</td>
+	</tr>
+	<tr>			
+		<td>가 격 : ${item.price}</td>
+	</tr>
+	<tr>		
+		<td>설  명: ${item.description}</td>
+	</tr>
+	<tr>		
+		<td colspan="2" align="center"><a href="list.do">상품 목록 보기</a></td>
+	</tr>
+</table>
+</body>
+</html>
+```
 
 
 
 
 
+#### ItemController.java
+
+```java
+package com.edu.spring.controller;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.edu.spring.domain.Item;
+import com.edu.spring.model.ItemCatalog;
+
+@Controller
+public class ItemController {
+	
+	@Autowired
+	private ItemCatalog itemCatalog;	//ItemController는 ItemCatalog에 의존 -> ItemController가 itemCatalog의 메소드 호출
+										//ItemCatalog는 ItemDAO에 의존 -> ItemCatalog가 ItemDAO의 메소드 호출
+										//ItemDAO는 SqlSession의존 -> SqlSession은 db에서 data 가져옴 
+										//-> 차례대로 List로 넘겨줌
+	
+	@RequestMapping("list.do")
+	public ModelAndView list() throws Exception{
+		List<Item> list = itemCatalog.getItemList();
+		return new ModelAndView("itemList", "list", list);
+	}
+	
+	@RequestMapping("itemView.do")		//itemNumber 자동 바인딩
+	public ModelAndView itemNumber(int itemnumber) throws Exception{
+		Item item = itemCatalog.getItem(itemnumber);
+		return new ModelAndView("itemView", "item", item);
+	}
+
+}
+```
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
+![image-20211125154556824](md-images/1125/image-20211125154556824.png)
