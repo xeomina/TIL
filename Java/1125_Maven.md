@@ -581,7 +581,7 @@ Query OK, 1 row affected (0.00 sec)
 mysql> INSERT INTO item VALUES(3,'키위',200,'비타민c가 매우 풍부합니다 미용에 좋습니다','img/kiui.jpg');
 Query OK, 1 row affected (0.00 sec)
 
-mysql> INSERT INTO item VALUES(4,'포도',300,'폴리페놀을 다량 함유하고 있어 항산화작용을 합니다','img/budou.jpg');
+mysql> INSERT INTO item VALUES(4,'포도',300,'폴리페놀을 다량 함유하고 있어 항산화작용을 합니다','img/grape.jpg');
 Query OK, 1 row affected (0.00 sec)
 
 mysql> commit;
@@ -978,14 +978,15 @@ public class ItemCatalogImpl implements ItemCatalog{
 	@Override
 	public List<Item> getItemList() throws Exception {
 		// TODO Auto-generated method stub
-		return null;
+		return itemDAO.getItemList();
 	}
 
 	@Override
 	public Item getItem(Integer itemId) throws Exception {
 		// TODO Auto-generated method stub
-		return null;
+		return itemDAO.getItem(itemId);
 	}
+
 }
 ```
 
@@ -1006,7 +1007,7 @@ public class ItemCatalogImpl implements ItemCatalog{
 </head>
 <body>
 <h2 align="center"> =================== Fruit All Item =================== </h2>
-<h3 href="list.do" align="center">Show All Fruit Item Using Spring MVC Framework</h3>
+<h3 align="center"><a href="list.do">Show All Fruit Item Using Spring MVC Framework></a></h3>
 </body>
 </html>
 ```
@@ -1018,7 +1019,34 @@ public class ItemCatalogImpl implements ItemCatalog{
 #### ItemController.java
 
 ```java
+package com.edu.spring.controller;
 
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.edu.spring.domain.Item;
+import com.edu.spring.model.ItemCatalog;
+
+@Controller
+public class ItemController {
+	
+	@Autowired
+	private ItemCatalog itemCatalog;	//ItemController는 ItemCatalog에 의존 -> ItemController가 itemCatalog의 메소드 호출
+										//ItemCatalog는 ItemDAO에 의존 -> ItemCatalog가 ItemDAO의 메소드 호출
+										//ItemDAO는 SqlSession의존 -> SqlSession은 db에서 data 가져옴 
+										//-> 차례대로 List로 넘겨줌
+	
+	@RequestMapping("list.do")
+	public ModelAndView list() throws Exception{
+		List<Item> list = itemCatalog.getItemList();
+		return  new ModelAndView("itemList", "list", list);
+	}
+
+}
 ```
 
 
@@ -1041,3 +1069,185 @@ public class ItemCatalogImpl implements ItemCatalog{
 
 
 -> 이게 하나의 세션 호출하고 결과값 받는게 세션 ! 
+
+
+
+#### itemList.jsp
+
+```jsp
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+<h1 align="center">Fruit Total List I. </h1>
+<table align="center" border="2">
+	<tr>
+		<c:forEach items="${list}" var="item">
+			<td>
+				<img alt="" src="${item.url}"><br>
+				상품명 : ${item.name}<br>
+				가  격 : ${item.price}
+			</td>
+		</c:forEach>
+	</tr>
+
+</table>
+</body>
+</html>
+```
+
+
+
+### 설정문서 조립
+
+#### web.xml
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee https://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" version="2.5">
+
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>classpath:beans/businesslogicBean.xml</param-value>
+	</context-param>
+	
+	<listener>
+		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+	</listener>
+
+	<servlet>
+		<servlet-name>appServlet</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<init-param>
+			<param-name>contextConfigLocation</param-name>
+			<param-value>classpath:beans/presentationBean.xml</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+		
+	<servlet-mapping>
+		<servlet-name>appServlet</servlet-name>
+		<url-pattern>*.do</url-pattern>
+	</servlet-mapping>
+	
+	<!-- 한글처리 -->
+	<filter>
+		<filter-name>encodingFilter</filter-name>
+		<filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+		<init-param>
+			<param-name>encoding</param-name>
+			<param-value>utf-8</param-value>
+		</init-param>
+	</filter>
+	<filter-mapping>
+		<filter-name>encodingFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+	
+
+
+</web-app>
+```
+
+
+
+#### businesslogicBean.xml
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd">
+
+	<context:property-placeholder location="classpath:config/dbconn.properties"/>
+	
+	<!-- 1. DataSource API Bean -->
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource">
+		<property name="driverClassName" value="${jdbc.mysql.driver}"/>
+		<property name="url" value="${jdbc.mysql.url}"/>
+		<property name="username" value="${jdbc.mysql.username}"/>
+		<property name="password" value="${jdbc.mysql.password}"/>
+	</bean>
+	
+	<!--  2. MyBatis API Bean :: SqlSessionFactoryBean-->
+	<bean id="sqlSessionFactoryBean" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="configLocation" value="classpath:config/SqlMapConfig.xml"/>
+		<property name="dataSource" ref="dataSource"/>
+	</bean>
+	
+	<!--  3. MyBatis API Bean :: SqlSession-->
+	<bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate">
+		<!--  생성자 주입-->
+		<constructor-arg ref="sqlSessionFactoryBean"/>
+	</bean>
+		
+	<!-- Annotation에서는 반드시 이 부분을 추가해야한다. -->
+	<context:component-scan base-package="com.edu.spring.model.impl"/>
+	
+	
+</beans>
+
+```
+
+
+
+#### presentationBean.xml
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd">
+
+	<!-- 4. InternalResourceViewResolver API bean -->
+	<bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="/WEB-INF/views/"/> <!--  결과페이지의 물리적인 저장 위치-->
+		<property name="suffix" value=".jsp"/> <!-- 결과 페이지의 확장자 등록 -->
+	</bean>
+
+	
+	<!-- Annotation에서는 반드시 이 부분을 추가해야한다. -->
+	<context:component-scan base-package="com.edu.spring.controller"/>	
+	
+</beans>
+```
+
+![image-20211125153127803](md-images/1125/image-20211125153127803.png)
+
+![image-20211125153134627](md-images/1125/image-20211125153134627.png)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
